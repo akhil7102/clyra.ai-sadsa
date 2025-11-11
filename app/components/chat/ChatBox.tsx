@@ -9,10 +9,11 @@ import { ScreenshotStateManager } from './ScreenshotStateManager';
 import { SendButton } from './SendButton.client';
 import { IconButton } from '~/components/ui/IconButton';
 import { SpeechRecognitionButton } from '~/components/chat/SpeechRecognition';
-import { SupabaseConnection } from './SupabaseConnection';
+import { SupabaseConnection } from '~/components/chat/SupabaseConnection';
 import { ExpoQrModal } from '~/components/workbench/ExpoQrModal';
-import styles from './BaseChat.module.scss';
+import { McpTools } from '~/components/chat/MCPTools';
 import { useSupabaseConnection } from '~/lib/hooks/useSupabaseConnection';
+import styles from './BaseChat.module.scss';
 import type { ProviderInfo } from '~/types/model';
 import type { DesignScheme } from '~/types/design-scheme';
 import type { ElementInfo } from '~/components/workbench/Inspector';
@@ -66,13 +67,22 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
   return (
     <div
       className={classNames(
-        'relative transition-theme z-prompt',
-        props.alignLeft ? 'w-full max-w-none mx-0 mr-auto self-start' : 'w-full max-w-chat mx-auto',
-        'rounded-2xl border border-[#2a2a2a] bg-[#1a1a1a] shadow-inner p-3',
-        'pb-[calc(env(safe-area-inset-bottom)+0.75rem)]'
+        'relative transition-theme z-prompt overflow-visible',
+        props.alignLeft ? 'w-full mx-0 mr-auto self-start' : 'w-full max-w-chat mx-auto',
+        props.alignLeft ? 'rounded-r-3xl border-r border-t border-b' : 'border',
+        props.alignLeft ? 'pt-4 pr-4 pb-4' : 'p-4',
+        'pb-[calc(env(safe-area-inset-bottom)+1rem)]'
       )}
+      style={{
+        background: 'rgba(10, 10, 10, 0.98)',
+        borderColor: 'rgba(59, 130, 246, 0.35)',
+        backdropFilter: 'blur(24px)',
+        boxShadow: '0 0 0 1px rgba(59, 130, 246, 0.1) inset, 0 8px 32px rgba(0, 0, 0, 0.4)',
+        borderRadius: '32px',
+        maxWidth: props.alignLeft ? '100%' : undefined,
+      }}
     >
-      <svg className={classNames(styles.PromptEffectContainer)}>
+      <svg className={classNames(styles.PromptEffectContainer, 'hidden')}>
         <defs>
           <linearGradient
             id="line-gradient"
@@ -134,15 +144,59 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
         </div>
       )}
       <div
-        className={classNames('relative transition-theme rounded-2xl border border-transparent')}
+        className={classNames('relative transition-theme')}
       >
-        <textarea
+        {/* Textarea + Send button wrapper to center the button relative to the input height */}
+        <div className="relative">
+          {/* Send Button - Positioned at top-right */}
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 transform z-10">
+            <ClientOnly>
+              {() => (
+                <SendButton
+                  position="inline"
+                  show={props.input.length > 0 || props.isStreaming || props.uploadedFiles.length > 0}
+                  isStreaming={props.isStreaming}
+                  disabled={!props.providerList || props.providerList.length === 0}
+                  onClick={(event) => {
+                    if (props.isStreaming) {
+                      props.handleStop?.();
+                      return;
+                    }
+
+                    if (props.input.length > 0 || props.uploadedFiles.length > 0) {
+                      props.handleSendMessage?.(event);
+                    }
+                  }}
+                />
+              )}
+            </ClientOnly>
+          </div>
+          <textarea
           ref={props.textareaRef}
           className={classNames(
-            'w-full pl-4 pt-4 pr-4 outline-none resize-none bg-transparent text-sm',
-            'text-white/90 placeholder-[#9b9b9b]',
-            'transition-all duration-200',
+            'w-full outline-none resize-none text-base',
+            'text-white placeholder-white/60',
+            'transition-all duration-200 leading-relaxed',
+            styles.HideScrollbar,
           )}
+          wrap="soft"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            minHeight: props.TEXTAREA_MIN_HEIGHT,
+            maxHeight: props.TEXTAREA_MAX_HEIGHT,
+            caretColor: '#3b82f6',
+            paddingLeft: '3rem',
+            paddingRight: '4rem',
+            paddingTop: '12px',
+            wordWrap: 'break-word',
+            overflowWrap: 'anywhere',
+            wordBreak: 'break-word',
+            whiteSpace: 'pre-wrap',
+            boxSizing: 'border-box',
+            overflow: 'auto',
+            overflowY: 'auto',
+          }}
           onFocus={(e) => {
             try {
               const scroller = document.querySelector('.modern-scrollbar') as HTMLElement | null;
@@ -152,11 +206,11 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
           }}
           onDragEnter={(e) => {
             e.preventDefault();
-            e.currentTarget.style.border = '2px solid #1488fc';
+            e.currentTarget.style.border = '2px solid #3b82f6';
           }}
           onDragOver={(e) => {
             e.preventDefault();
-            e.currentTarget.style.border = '2px solid #1488fc';
+            e.currentTarget.style.border = '2px solid #3b82f6';
           }}
           onDragLeave={(e) => {
             e.preventDefault();
@@ -206,16 +260,17 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
             props.handleInputChange?.(event);
           }}
           onPaste={props.handlePaste}
-          style={{
-            minHeight: props.TEXTAREA_MIN_HEIGHT,
-            maxHeight: props.TEXTAREA_MAX_HEIGHT,
-          }}
           placeholder={'How can Clyra.ai help you today?'}
           translate="no"
         />
-        <div className="flex items-center justify-between gap-3 text-sm p-2 pt-3">
-          <div className="flex gap-2 items-center">
-            <IconButton title="Upload file" className="transition-all text-[#9b9b9b] hover:text-[#00FFB7] hover:shadow-[0_0_8px_#00FFB7]" onClick={() => props.handleFileUpload()}>
+        </div>
+        <div
+          className="mt-2 flex items-center justify-between gap-4 text-sm flex-wrap"
+          style={{ paddingLeft: '3rem', paddingRight: '1rem' }}
+        >
+          {/* Left tools */}
+          <div className="flex items-center gap-3 shrink-0">
+            <IconButton title="Upload file" className="transition-all text-white/60 hover:text-[#3b82f6]" onClick={() => props.handleFileUpload()}>
               <div className="i-ph:paperclip text-xl"></div>
             </IconButton>
 
@@ -225,10 +280,13 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
               onStop={props.stopListening}
               disabled={props.isStreaming}
             />
+          </div>
 
-            <ClientOnly>
-              {() => (
-                <div className="flex items-center gap-2 pl-2 min-w-[240px] max-w-full">
+          {/* Right group: Model selector + status icons */}
+          <ClientOnly>
+            {() => (
+              <div className="flex items-center gap-2 ml-auto flex-1 min-w-[260px] max-w-[620px]">
+                <div className="flex-1 min-w-0">
                   <ModelSelector
                     key={props.provider?.name + ':' + props.modelList.length}
                     model={props.model}
@@ -240,49 +298,30 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
                     apiKeys={props.apiKeys}
                     modelLoading={props.isModelLoading}
                   />
-                  <button
-                    type="button"
-                    title={isConnected ? 'Supabase connected' : 'Supabase disconnected'}
-                    onClick={() => document.dispatchEvent(new Event('open-supabase-connection'))}
-                    className={classNames(
-                      'p-1.5 rounded-md transition-all',
-                      isConnected
-                        ? 'text-[#00FFB7] drop-shadow-[0_0_8px_#00FFB7]'
-                        : 'text-[#6b7280] hover:text-[#00FFB7] hover:drop-shadow-[0_0_8px_#00FFB7]'
-                    )}
-                  >
-                    <div className="i-ph:lightning text-xl" />
-                  </button>
                 </div>
-              )}
-            </ClientOnly>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden">
-              <SupabaseConnection />
-            </div>
-            <ExpoQrModal open={props.qrModalOpen} onClose={() => props.setQrModalOpen(false)} />
-            <ClientOnly>
-              {() => (
-                <SendButton
-                  position="inline"
-                  show={props.input.length > 0 || props.isStreaming || props.uploadedFiles.length > 0}
-                  isStreaming={props.isStreaming}
-                  disabled={!props.providerList || props.providerList.length === 0}
-                  onClick={(event) => {
-                    if (props.isStreaming) {
-                      props.handleStop?.();
-                      return;
-                    }
+                <button
+                  type="button"
+                  title={isConnected ? 'Supabase connected' : 'Supabase disconnected'}
+                  onClick={() => document.dispatchEvent(new Event('open-supabase-connection'))}
+                  className={classNames(
+                    'p-1.5 rounded-md transition-all',
+                    isConnected
+                      ? 'text-[#3b82f6]'
+                      : 'text-white/60 hover:text-[#3b82f6]'
+                  )}
+                >
+                  <div className="i-ph:lightning text-xl" />
+                </button>
+                <McpTools />
+              </div>
+            )}
+          </ClientOnly>
 
-                    if (props.input.length > 0 || props.uploadedFiles.length > 0) {
-                      props.handleSendMessage?.(event);
-                    }
-                  }}
-                />
-              )}
-            </ClientOnly>
+          {/* Hidden connection manager + QR modal */}
+          <div className="hidden">
+            <SupabaseConnection />
           </div>
+          <ExpoQrModal open={props.qrModalOpen} onClose={() => props.setQrModalOpen(false)} />
         </div>
       </div>
     </div>

@@ -101,8 +101,8 @@ export default function Blog() {
               onClick={() => setSelectedCategory(category)}
               className={`px-6 py-2 rounded-full font-medium transition-all duration-200 ${
                 selectedCategory === category
-                  ? 'bg-gradient-to-r from-[#4DA8FF] to-[#2C8CFF] text-white shadow-md'
-                  : 'bg-white/80 dark:bg-gray-900/80 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary border border-accent-200/60 hover:border-[#4DA8FF]'
+                  ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white shadow-md shadow-cyan-500/20'
+                  : 'bg-black/40 backdrop-blur-md text-gray-300 hover:text-white border border-gray-700/50 hover:border-cyan-400/50'
               }`}
             >
               {category}
@@ -114,38 +114,38 @@ export default function Blog() {
       {/* Featured Post */}
       {featuredPost && selectedCategory === 'All' && (
         <div className="mb-12">
-          <article className="bg-gradient-to-br from-[#4DA8FF]/10 to-[#2C8CFF]/10 rounded-3xl border border-accent-200/60 overflow-hidden shadow-xl">
+          <article className="bg-gradient-to-br from-cyan-500/10 to-blue-600/10 rounded-3xl border border-cyan-500/20 overflow-hidden shadow-xl backdrop-blur-md">
             <div className="grid md:grid-cols-2 gap-0">
               <div className="p-8 lg:p-12 flex flex-col justify-center">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="px-3 py-1 bg-gradient-to-r from-[#4DA8FF] to-[#2C8CFF] text-white text-sm font-semibold rounded-full">
+                  <span className="px-3 py-1 bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-sm font-semibold rounded-full shadow-md shadow-cyan-500/20">
                     Featured
                   </span>
-                  <span className="text-sm text-bolt-elements-textSecondary">
+                  <span className="text-sm text-gray-400">
                     {featuredPost.category}
                   </span>
                 </div>
-                <h2 className="text-3xl lg:text-4xl font-bold text-bolt-elements-textPrimary mb-4">
+                <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
                   {featuredPost.title}
                 </h2>
-                <p className="text-bolt-elements-textSecondary text-lg mb-6">
+                <p className="text-gray-300 text-lg mb-6">
                   {featuredPost.excerpt}
                 </p>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-[#4DA8FF] to-[#2C8CFF] rounded-full flex items-center justify-center text-white font-semibold">
+                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
                       {featuredPost.author.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-bolt-elements-textPrimary font-medium">{featuredPost.author}</p>
-                      <p className="text-sm text-bolt-elements-textSecondary">{featuredPost.date}</p>
+                      <p className="text-white font-medium">{featuredPost.author}</p>
+                      <p className="text-sm text-gray-400">{featuredPost.date}</p>
                     </div>
                   </div>
-                  <span className="text-sm text-bolt-elements-textSecondary">{featuredPost.readTime}</span>
+                  <span className="text-sm text-gray-400">{featuredPost.readTime}</span>
                 </div>
                 <Link
                   to={`/blog/${featuredPost.id}`}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#4DA8FF] to-[#2C8CFF] text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-200"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold rounded-xl hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] transition-all duration-200"
                 >
                   Read More
                   <span className="i-ph:arrow-right"></span>
@@ -169,7 +169,7 @@ export default function Blog() {
         {regularPosts.map((post) => (
           <article 
             key={post.id}
-            className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-2xl border border-accent-200/60 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            className="bg-black/40 backdrop-blur-md rounded-2xl border border-gray-700/50 overflow-hidden shadow-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:border-cyan-400/50 transition-all duration-300 hover:-translate-y-1"
           >
             <div className="relative h-48">
               <img 
@@ -178,36 +178,36 @@ export default function Blog() {
                 className="w-full h-full object-cover"
               />
               <div className="absolute top-4 left-4">
-                <span className="px-3 py-1 bg-white/90 dark:bg-gray-800/90 text-bolt-elements-textPrimary text-sm font-semibold rounded-full backdrop-blur-sm">
+                <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-sm font-semibold rounded-full border border-gray-700/50">
                   {post.category}
                 </span>
               </div>
             </div>
             
             <div className="p-6">
-              <h3 className="text-xl font-bold text-bolt-elements-textPrimary mb-3 line-clamp-2">
+              <h3 className="text-xl font-bold text-white mb-3 line-clamp-2">
                 {post.title}
               </h3>
-              <p className="text-bolt-elements-textSecondary mb-4 line-clamp-3">
+              <p className="text-gray-400 mb-4 line-clamp-3">
                 {post.excerpt}
               </p>
               
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-[#4DA8FF] to-[#2C8CFF] rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                  <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
                     {post.author.charAt(0)}
                   </div>
                   <div>
-                    <p className="text-sm text-bolt-elements-textPrimary font-medium">{post.author}</p>
-                    <p className="text-xs text-bolt-elements-textSecondary">{post.date}</p>
+                    <p className="text-sm text-white font-medium">{post.author}</p>
+                    <p className="text-xs text-gray-400">{post.date}</p>
                   </div>
                 </div>
-                <span className="text-xs text-bolt-elements-textSecondary">{post.readTime}</span>
+                <span className="text-xs text-gray-400">{post.readTime}</span>
               </div>
               
               <Link
                 to={`/blog/${post.id}`}
-                className="inline-flex items-center gap-2 text-[#4DA8FF] hover:text-[#2C8CFF] font-semibold transition-colors"
+                className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-semibold transition-colors"
               >
                 Read More
                 <span className="i-ph:arrow-right"></span>
@@ -219,7 +219,7 @@ export default function Blog() {
 
       {/* Load More Button */}
       <div className="text-center mt-12">
-        <button className="px-8 py-3 bg-white/80 dark:bg-gray-900/80 text-bolt-elements-textPrimary font-semibold rounded-xl border border-accent-200/60 hover:border-[#4DA8FF] hover:bg-gradient-to-r hover:from-[#4DA8FF]/10 hover:to-[#2C8CFF]/10 transition-all duration-200">
+        <button className="px-8 py-3 bg-black/40 backdrop-blur-md text-white font-semibold rounded-xl border border-gray-700/50 hover:border-cyan-400 hover:bg-gradient-to-r hover:from-cyan-400/10 hover:to-blue-500/10 transition-all duration-200">
           Load More Articles
         </button>
       </div>

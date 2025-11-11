@@ -1,10 +1,11 @@
 import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
-import { getAuth } from '@clerk/remix/ssr.server';
 import { getServerSupabase } from '~/lib/supabase/server';
+import { requireAuth } from '~/lib/auth/supabase-auth.server';
 
 export async function action(args: ActionFunctionArgs) {
-  const { userId } = await getAuth(args);
-  if (!userId) return json({ error: 'Unauthorized' }, { status: 401 });
+  const { user } = await requireAuth(args);
+  if (!user) return json({ error: 'Unauthorized' }, { status: 401 });
+  const userId = user.id;
   if (args.request.method !== 'POST') return json({ error: 'Method not allowed' }, { status: 405 });
 
   const supabase = getServerSupabase((args as any)?.context?.cloudflare?.env);

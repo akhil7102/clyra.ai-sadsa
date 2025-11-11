@@ -57,6 +57,14 @@ const sliderOptions: SliderOptions<WorkbenchViewType> = {
   },
 };
 
+const workbenchTabs = [
+  { id: 'app', label: 'App', icon: 'i-ph:app-window', color: '#06b6d4' }, // Cyan
+  { id: 'code', label: 'Code', icon: 'i-ph:code', color: '#8b5cf6' }, // Purple
+  { id: 'analytics', label: 'Analytics', icon: 'i-ph:chart-line', color: '#10b981' }, // Green
+  { id: 'databases', label: 'Databases', icon: 'i-ph:database', color: '#f59e0b' }, // Amber
+  { id: 'diff', label: 'Diff', icon: 'i-ph:git-diff', color: '#ec4899' }, // Pink
+];
+
 const workbenchVariants = {
   closed: {
     width: 0,
@@ -112,7 +120,7 @@ const FileModifiedDropdown = memo(
                 leaveFrom="transform scale-100 opacity-100"
                 leaveTo="transform scale-95 opacity-0"
               >
-                <Popover.Panel className="absolute right-0 z-20 mt-2 w-80 origin-top-right rounded-xl bg-bolt-elements-background-depth-2 shadow-xl border border-bolt-elements-borderColor">
+                <Popover.Panel className="absolute right-0 z-20 mt-2 w-80 origin-top-right rounded-xl bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor">
                   <div className="p-2">
                     <div className="relative mx-2 mb-2">
                       <input
@@ -291,6 +299,7 @@ export const Workbench = memo(
     renderLogger.trace('Workbench');
 
     const [fileHistory, setFileHistory] = useState<Record<string, FileHistory>>({});
+    const [activeTab, setActiveTab] = useState('app');
 
     // const modifiedFiles = Array.from(useStore(workbenchStore.unsavedFiles).keys());
 
@@ -392,7 +401,47 @@ export const Workbench = memo(
             )}
           >
             <div className="absolute inset-0 px-2 lg:px-4">
-              <div className="h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm rounded-lg overflow-hidden">
+              <div className="h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor rounded-lg overflow-hidden">
+                {/* Tab Navigation */}
+                <div className="flex items-center border-b border-bolt-elements-borderColor bg-bolt-elements-background-depth-1">
+                  {workbenchTabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={classNames(
+                        'flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all relative',
+                        activeTab === tab.id
+                          ? 'bg-bolt-elements-background-depth-2'
+                          : 'bg-black hover:bg-bolt-elements-background-depth-2/50'
+                      )}
+                      style={{
+                        color: tab.color,
+                        opacity: activeTab === tab.id ? 1 : 0.6,
+                      }}
+                    >
+                      <span className={tab.icon} />
+                      <span>{tab.label}</span>
+                      {activeTab === tab.id && (
+                        <div 
+                          className="absolute bottom-0 left-0 right-0 h-0.5" 
+                          style={{ backgroundColor: tab.color }}
+                        />
+                      )}
+                    </button>
+                  ))}
+                  <div className="ml-auto flex items-center gap-2 px-3">
+                    <IconButton
+                      icon="i-ph:x-circle"
+                      size="xl"
+                      onClick={() => {
+                        workbenchStore.showWorkbench.set(false);
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Original controls bar - only shown for code tab */}
+                {activeTab === 'code' && (
                 <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor gap-1.5">
                   <button
                     className={`${showChat ? 'i-ph:sidebar-simple-fill' : 'i-ph:sidebar-simple'} text-lg text-bolt-elements-textSecondary mr-1`}
@@ -403,7 +452,7 @@ export const Workbench = memo(
                       }
                     }}
                   />
-                  <Slider selected={selectedView} options={sliderOptions} setSelected={setSelectedView} />
+                  {/* Slider removed as per user request */}
                   <div className="ml-auto" />
                   {selectedView === 'code' && (
                     <div className="flex overflow-y-auto">
@@ -424,7 +473,7 @@ export const Workbench = memo(
                             className={classNames(
                               'min-w-[240px] z-[250]',
                               'bg-white dark:bg-[#141414]',
-                              'rounded-lg shadow-lg',
+                              'rounded-lg',
                               'border border-gray-200/50 dark:border-gray-800/50',
                               'animate-in fade-in-0 zoom-in-95',
                               'py-1',
@@ -470,17 +519,43 @@ export const Workbench = memo(
                   {selectedView === 'diff' && (
                     <FileModifiedDropdown fileHistory={fileHistory} onSelectFile={handleSelectFile} />
                   )}
-                  <IconButton
-                    icon="i-ph:x-circle"
-                    className="-mr-1"
-                    size="xl"
-                    onClick={() => {
-                      workbenchStore.showWorkbench.set(false);
-                    }}
-                  />
                 </div>
+                )}
                 <div className="relative flex-1 overflow-hidden">
-                  <View initial={{ x: '0%' }} animate={{ x: selectedView === 'code' ? '0%' : '-100%' }}>
+                  {/* Content for different tabs */}
+                  {activeTab === 'app' && (
+                    <View initial={{ x: '100%' }} animate={{ x: selectedView === 'preview' || activeTab === 'app' ? '0%' : '100%' }}>
+                      <Preview setSelectedElement={setSelectedElement} />
+                    </View>
+                  )}
+                  {activeTab === 'analytics' && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center text-bolt-elements-textSecondary">
+                        <span className="i-ph:chart-line text-6xl mb-4 block opacity-50" />
+                        <p className="text-lg">Analytics Dashboard</p>
+                        <p className="text-sm mt-2">Coming soon...</p>
+                      </div>
+                    </div>
+                  )}
+                  {activeTab === 'databases' && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center text-bolt-elements-textSecondary">
+                        <span className="i-ph:database text-6xl mb-4 block opacity-50" />
+                        <p className="text-lg">Database Management</p>
+                        <p className="text-sm mt-2">Coming soon...</p>
+                      </div>
+                    </div>
+                  )}
+                  {activeTab === 'diff' && (
+                    <View
+                      initial={{ x: '100%' }}
+                      animate={{ x: selectedView === 'diff' || activeTab === 'diff' ? '0%' : selectedView === 'code' ? '100%' : '-100%' }}
+                    >
+                      <DiffView fileHistory={fileHistory} setFileHistory={setFileHistory} />
+                    </View>
+                  )}
+                  {activeTab === 'code' && (
+                  <View initial={{ x: '0%' }} animate={{ x: selectedView === 'code' || activeTab === 'code' ? '0%' : '-100%' }}>
                     <EditorPanel
                       editorDocument={currentDocument}
                       isStreaming={isStreaming}
@@ -495,15 +570,7 @@ export const Workbench = memo(
                       onFileReset={onFileReset}
                     />
                   </View>
-                  <View
-                    initial={{ x: '100%' }}
-                    animate={{ x: selectedView === 'diff' ? '0%' : selectedView === 'code' ? '100%' : '-100%' }}
-                  >
-                    <DiffView fileHistory={fileHistory} setFileHistory={setFileHistory} />
-                  </View>
-                  <View initial={{ x: '100%' }} animate={{ x: selectedView === 'preview' ? '0%' : '100%' }}>
-                    <Preview setSelectedElement={setSelectedElement} />
-                  </View>
+                  )}
                 </div>
               </div>
             </div>

@@ -34,5 +34,10 @@
     "**/.server/**/*.tsx",
     "**/.client/**/*.ts",
     "**/.client/**/*.tsx"
+  ],
+  "exclude": [
+    "functions/**",
+    "oldcontrolpannel.tsx",
+    "app/components/Beams.tsx"
   ]
 }

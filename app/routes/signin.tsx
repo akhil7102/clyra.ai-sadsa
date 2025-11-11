@@ -1,6 +1,6 @@
 import { redirect } from '@remix-run/cloudflare';
 
-export const loader = () => redirect('/sign-in');
+export const loader = () => redirect('/');
 
 export default function LegacySignInRedirect() {
   return null;

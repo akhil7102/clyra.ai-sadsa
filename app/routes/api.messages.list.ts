@@ -1,10 +1,11 @@
 import { json, type LoaderFunctionArgs } from '@remix-run/cloudflare';
-import { getAuth } from '@clerk/remix/ssr.server';
 import { getServerSupabase } from '~/lib/supabase/server';
+import { requireAuth } from '~/lib/auth/supabase-auth.server';
 
 export async function loader(args: LoaderFunctionArgs) {
-  const { userId } = await getAuth(args);
-  if (!userId) return json({ error: 'Unauthorized' }, { status: 401 });
+  const { user } = await requireAuth(args);
+  if (!user) return json({ error: 'Unauthorized' }, { status: 401 });
+  const userId = user.id;
 
   const url = new URL(args.request.url);
   const chat_id = url.searchParams.get('chat_id') || '';

@@ -1,12 +1,18 @@
+const CACHE_NAME = 'clyra-static-v2';
+const PRECACHE_URLS = ['/favicon.ico', '/manifest.webmanifest'];
+
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open('clyra-static-v1').then((cache) => cache.addAll(['/','/favicon.ico','/manifest.webmanifest']))
-  );
+  self.skipWaiting();
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)));
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => !k.startsWith('clyra-static-v1')).map((k) => caches.delete(k))))
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)));
+      await self.clients.claim();
+    })()
   );
 });
 
@@ -14,14 +20,40 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
 
+  const accept = request.headers.get('accept') || '';
+  const isNavigation = request.mode === 'navigate' || accept.includes('text/html');
+
+  if (isNavigation) {
+    // Network-first for HTML pages, do not cache HTML
+    event.respondWith(
+      (async () => {
+        try {
+          const fresh = await fetch(request, { cache: 'no-store' });
+          return fresh;
+        } catch (err) {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          return new Response('Offline', { status: 503, statusText: 'Offline' });
+        }
+      })()
+    );
+    return;
+  }
+
+  // Cache-first for non-HTML assets
   event.respondWith(
-    caches.match(request).then((cached) => {
+    (async () => {
+      const cached = await caches.match(request);
       if (cached) return cached;
-      return fetch(request).then((response) => {
+      try {
+        const response = await fetch(request);
         const copy = response.clone();
-        caches.open('clyra-static-v1').then((cache) => cache.put(request, copy));
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(request, copy);
         return response;
-      }).catch(() => cached);
-    })
+      } catch (err) {
+        return cached || Response.error();
+      }
+    })()
   );
 });

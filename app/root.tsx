@@ -1,8 +1,11 @@
 import { useStore } from '@nanostores/react';
-import type { LinksFunction } from '@remix-run/cloudflare';
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useNavigation } from '@remix-run/react';
+import type { LinksFunction, HeadersFunction } from '@remix-run/cloudflare';
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useNavigation, useLoaderData } from '@remix-run/react';
 import type { LoaderFunctionArgs } from '@remix-run/cloudflare';
-import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
+import { json } from '@remix-run/cloudflare';
+import { getAuthUser } from './lib/auth/supabase-auth.server';
+import { SupabaseProvider } from './lib/auth/supabase-client';
+import resetStyles from '@unocss/reset/eric-meyer.css?url';
 import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
@@ -11,11 +14,8 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ClientOnly } from 'remix-utils/client-only';
 import { cssTransition, ToastContainer } from 'react-toastify';
-import { ClerkApp } from '@clerk/remix';
-import { rootAuthLoader } from '@clerk/remix/ssr.server';
 
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
-import tailwindStyles from './styles/tailwind.css?url';
 import globalStyles from './styles/index.scss?url';
 import xtermStyles from '@xterm/xterm/css/xterm.css?url';
 
@@ -33,8 +33,7 @@ export const links: LinksFunction = () => [
   { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
   { rel: 'manifest', href: '/manifest.webmanifest' },
   { rel: 'stylesheet', href: reactToastifyStyles },
-  { rel: 'stylesheet', href: tailwindReset },
-  { rel: 'stylesheet', href: tailwindStyles },
+  { rel: 'stylesheet', href: resetStyles },
   { rel: 'stylesheet', href: globalStyles },
   { rel: 'stylesheet', href: xtermStyles },
   {
@@ -51,6 +50,12 @@ export const links: LinksFunction = () => [
     href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
   },
 ];
+
+export const headers: HeadersFunction = () => ({
+  'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+  Pragma: 'no-cache',
+  Expires: '0',
+});
 
 const inlineThemeCode = stripIndents`
   setTutorialKitTheme();
@@ -77,13 +82,21 @@ export const Head = createHead(() => (
   </>
 ));
 
-export const loader = (args: LoaderFunctionArgs) => {
-  const publishableKey = (process.env.CLERK_PUBLISHABLE_KEY as string) || (args as any)?.context?.cloudflare?.env?.CLERK_PUBLISHABLE_KEY;
-  const secretKey = (process.env.CLERK_SECRET_KEY as string) || (args as any)?.context?.cloudflare?.env?.CLERK_SECRET_KEY;
-  return rootAuthLoader(args, { publishableKey, secretKey });
+export const loader = async (args: LoaderFunctionArgs) => {
+  const { user, headers } = await getAuthUser(args);
+  const env = (args as any)?.context?.cloudflare?.env;
+  
+  return json(
+    {
+      user,
+      env: {
+        VITE_SUPABASE_URL: env?.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL,
+        VITE_SUPABASE_ANON_KEY: env?.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY,
+      },
+    },
+    { headers }
+  );
 };
-
-// No Clerk error boundary needed with current @clerk/remix
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const theme = useStore(themeStore);
@@ -104,7 +117,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-[#0b0b0c] text-gray-200 overflow-hidden">
+    <div className="relative min-h-screen text-gray-200 overflow-hidden">
       {/* Top route progress bar */}
       <div
         style={{
@@ -120,6 +133,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
           zIndex: 1000,
         }}
       />
+
+      {/* Global background layers */}
+      <div className="app-bg-layers">
+        <div className="gradient-background" />
+        <div className="glow-overlay" />
+        <div className="diffusion-layer" />
+        <div className="shimmer-layer" />
+        <div className="grain-texture" />
+        <div className="vignette" />
+      </div>
 
       {/* Foreground content */}
       <div className="relative z-10">
@@ -162,6 +185,7 @@ import { logStore } from './lib/stores/logs';
 
 function App() {
   const theme = useStore(themeStore);
+  const { user, env } = useLoaderData<typeof loader>();
 
   useEffect(() => {
     logStore.logSystem('Application initialized', {
@@ -191,10 +215,19 @@ function App() {
   }, []);
 
   return (
-    <Layout>
-      <Outlet />
-    </Layout>
+    <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.ENV = ${JSON.stringify(env)}`,
+        }}
+      />
+      <SupabaseProvider serverSession={user}>
+        <Layout>
+          <Outlet />
+        </Layout>
+      </SupabaseProvider>
+    </>
   );
 }
 
-export default ClerkApp(App);
+export default App;

@@ -6,6 +6,8 @@ import { optimizeCssModules } from 'vite-plugin-optimize-css-modules';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import * as dotenv from 'dotenv';
 
+import autoprefixer from 'autoprefixer';
+
 // Load environment variables from multiple files
 dotenv.config({ path: '.env.local' });
 dotenv.config({ path: '.env' });
@@ -65,7 +67,15 @@ export default defineConfig((config) => {
       'LMSTUDIO_API_BASE_URL',
       'TOGETHER_API_BASE_URL',
     ],
+    server: {
+      hmr: {
+        overlay: false,
+      },
+    },
     css: {
+      postcss: {
+        plugins: [autoprefixer()],
+      },
       preprocessorOptions: {
         scss: {
           api: 'modern-compiler',

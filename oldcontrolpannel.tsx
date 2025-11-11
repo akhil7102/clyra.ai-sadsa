@@ -304,34 +304,45 @@ export const ControlPanel = ({ open, onClose }: ControlPanelProps) => {
                     {activeTab ? (
                       getTabComponent(activeTab)
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
-                        {visibleTabs.map((tab, index) => (
-                          <div
-                            key={tab.id}
-                            className={classNames(
-                              'aspect-[1.5/1] transition-transform duration-100 ease-out',
-                              'hover:scale-[1.01]',
-                            )}
-                            style={{
-                              animationDelay: `${index * 30}ms`,
-                              animation: open ? 'fadeInUp 200ms ease-out forwards' : 'none',
-                            }}
-                          >
-                            <TabTile
-                              tab={tab}
-                              onClick={() => handleTabClick(tab.id as TabType)}
-                              isActive={activeTab === tab.id}
-                              hasUpdate={getTabUpdateStatus(tab.id)}
-                              statusMessage={getStatusMessage(tab.id)}
-                              description={TAB_DESCRIPTIONS[tab.id]}
-                              isLoading={loadingTab === tab.id}
-                              className="h-full relative"
-                            >
-                              {BETA_TABS.has(tab.id) && <BetaLabel />}
-                            </TabTile>
+                      (() => {
+                        const landingItems: Array<{ id: TabType; title: string; description: string }> = [
+                          { id: 'features', title: 'Features', description: 'Explore new and upcoming features' },
+                          { id: 'data', title: 'Data Management', description: 'Manage your data and storage' },
+                          { id: 'cloud-providers', title: 'Cloud Providers', description: 'Configure cloud AI providers and models' },
+                          { id: 'local-providers', title: 'Local Providers', description: 'Configure local AI providers and models' },
+                        ];
+
+                        return (
+                          <div className="flex flex-col gap-3">
+                            {landingItems.map((item, index) => (
+                              <button
+                                key={item.id}
+                                onClick={() => handleTabClick(item.id)}
+                                className={classNames(
+                                  'w-full text-left rounded-xl border transition-all',
+                                  'border-accent-100/60 bg-white/70 dark:bg-gray-900/60 backdrop-blur-md',
+                                  'shadow-[0_0_14px_rgba(77,168,255,0.25)] hover:shadow-[0_0_22px_rgba(77,168,255,0.45)]',
+                                  'hover:bg-white/80 dark:hover:bg-gray-900/70',
+                                  'px-5 py-4',
+                                )}
+                                style={{
+                                  animationDelay: `${index * 30}ms`,
+                                  animation: open ? 'fadeInUp 200ms ease-out forwards' : 'none',
+                                }}
+                              >
+                                <div className="flex flex-col">
+                                  <span className="text-lg font-semibold text-accent-700 dark:text-accent-300">
+                                    {item.title}
+                                  </span>
+                                  <span className="text-sm mt-1 text-accent-800/80 dark:text-accent-200/80">
+                                    {item.description}
+                                  </span>
+                                </div>
+                              </button>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        );
+                      })()
                     )}
                   </div>
                 </div>

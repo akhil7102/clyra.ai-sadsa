@@ -449,35 +449,39 @@ export const ModelSelector = ({
   const lockedProvider = provider?.name || 'Google';
 
   return (
-    <div className="flex gap-2 flex-col sm:flex-row">
+    <div className="flex items-center gap-2 flex-row flex-wrap w-full">
       {/* Provider (locked) */}
-      <div className="relative flex w-full select-none">
+      <div className="relative flex select-none shrink-0 w-auto">
         <div
-          className={classNames(
-            'w-full p-2 rounded-lg border border-accent-200/60',
-            'bg-white/70 dark:bg-gray-900/60 text-bolt-elements-textPrimary backdrop-blur-md',
-            'transition-all cursor-default',
-            'shadow-[0_0_12px_rgba(77,168,255,0.35)]'
-          )}
+          className="w-auto h-9 px-3 rounded-lg border border-cyan-400/40 transition-all cursor-default flex items-center whitespace-nowrap"
+          style={{
+            background: 'rgba(17, 24, 39, 0.85)',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 0 20px rgba(6, 182, 212, 0.25)',
+          }}
           role="presentation"
           aria-label="Provider"
         >
-          <div className="flex items-center justify-between">
-            <div className="truncate">{lockedProvider}</div>
+          <div className="flex items-center gap-2">
+            <div className="truncate text-white font-medium">{lockedProvider}</div>
+            <span className="text-xs text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded">Locked</span>
           </div>
         </div>
       </div>
 
       {/* Model Combobox (interactive) */}
-      <div className="relative flex w-full min-w-[70%]" onKeyDown={handleModelKeyDown} ref={modelDropdownRef}>
+      <div className="relative flex w-full min-w-0" onKeyDown={handleModelKeyDown} ref={modelDropdownRef}>
         <div
           className={classNames(
-            'w-full p-2 rounded-lg border border-bolt-elements-borderColor',
-            'bg-bolt-elements-prompt-background text-bolt-elements-textPrimary',
-            'focus-within:outline-none focus-within:ring-2 focus-within:ring-bolt-elements-focus',
-            'transition-all cursor-pointer',
-            isModelDropdownOpen ? 'ring-2 ring-bolt-elements-focus' : undefined,
+            'w-full h-9 px-3 rounded-lg border transition-all cursor-pointer flex items-center',
+            isModelDropdownOpen 
+              ? 'border-cyan-400/50 ring-2 ring-cyan-400/20' 
+              : 'border-gray-700/50 hover:border-cyan-400/30',
           )}
+          style={{
+            background: 'rgba(17, 24, 39, 0.85)',
+            backdropFilter: 'blur(12px)',
+          }}
           onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -492,10 +496,10 @@ export const ModelSelector = ({
           tabIndex={0}
         >
           <div className="flex items-center justify-between">
-            <div className="truncate">{modelList.find((m) => m.name === model)?.label || 'Select model'}</div>
+            <div className="truncate text-white font-medium">{modelList.find((m) => m.name === model)?.label || 'Select model'}</div>
             <div
               className={classNames(
-                'i-ph:caret-down w-4 h-4 text-bolt-elements-textSecondary opacity-75',
+                'i-ph:caret-down w-4 h-4 text-cyan-400 transition-transform',
                 isModelDropdownOpen ? 'rotate-180' : undefined,
               )}
             />
@@ -504,11 +508,17 @@ export const ModelSelector = ({
 
         {isModelDropdownOpen && (
           <div
-            className="absolute z-10 w-full mt-1 py-1 rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 shadow-lg"
+            className="absolute z-50 w-full mt-1 py-2 rounded-xl shadow-2xl top-full"
+            style={{
+              background: 'rgba(17, 24, 39, 0.98)',
+              border: '1px solid rgba(6, 182, 212, 0.4)',
+              backdropFilter: 'blur(24px)',
+              boxShadow: '0 0 40px rgba(6, 182, 212, 0.3), 0 10px 50px rgba(0, 0, 0, 0.5)',
+            }}
             role="listbox"
             id="model-listbox"
           >
-            <div className="px-2 pb-2 space-y-2">
+            <div className="px-3 pb-2 pt-1 space-y-2">
               {/* Search Input */}
               <div className="relative">
                 <input
@@ -518,18 +528,21 @@ export const ModelSelector = ({
                   onChange={(e) => setModelSearchQuery(e.target.value)}
                   placeholder="Search models... (⌘K to clear)"
                   className={classNames(
-                    'w-full pl-8 pr-8 py-1.5 rounded-md text-sm',
-                    'bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor',
-                    'text-bolt-elements-textPrimary placeholder:text-bolt-elements-textTertiary',
-                    'focus:outline-none focus:ring-2 focus:ring-bolt-elements-focus',
-                    'transition-all',
+                    'w-full pl-9 pr-9 py-2.5 rounded-lg text-sm',
+                    'text-white placeholder:text-gray-500',
+                    'focus:outline-none focus:ring-2 focus:ring-cyan-400/30 transition-all',
                   )}
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.3)',
+                    border: '1px solid rgba(107, 114, 128, 0.3)',
+                    caretColor: '#06b6d4',
+                  }}
                   onClick={(e) => e.stopPropagation()}
                   role="searchbox"
                   aria-label="Search models"
                 />
-                <div className="absolute left-2.5 top-1/2 -translate-y-1/2">
-                  <span className="i-ph:magnifying-glass text-bolt-elements-textTertiary" />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                  <span className="i-ph:magnifying-glass text-gray-400" />
                 </div>
                 {modelSearchQuery && (
                   <button
@@ -584,15 +597,23 @@ export const ModelSelector = ({
                     role="option"
                     aria-selected={model === modelOption.name}
                     className={classNames(
-                      'px-3 py-2 text-sm cursor-pointer',
-                      'hover:bg-bolt-elements-background-depth-3',
-                      'text-bolt-elements-textPrimary',
-                      'outline-none',
-                      model === modelOption.name || focusedModelIndex === index
-                        ? 'bg-bolt-elements-background-depth-2'
-                        : undefined,
-                      focusedModelIndex === index ? 'ring-1 ring-inset ring-bolt-elements-focus' : undefined,
+                      'px-4 py-2.5 text-sm cursor-pointer',
+                      'text-white',
+                      'outline-none transition-all',
                     )}
+                    style={{
+                      background: model === modelOption.name || focusedModelIndex === index
+                        ? 'rgba(59, 130, 246, 0.15)'
+                        : 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = model === modelOption.name || focusedModelIndex === index
+                        ? 'rgba(59, 130, 246, 0.15)'
+                        : 'transparent';
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       setModel?.(modelOption.name);

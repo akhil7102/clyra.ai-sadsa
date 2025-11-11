@@ -5,7 +5,6 @@ import React, { lazy, Suspense } from 'react';
 import { Header } from '~/components/header/Header';
 import { useLocation } from '@remix-run/react';
 const Chat = lazy(() => import('~/components/chat/Chat.client').then(m => ({ default: m.Chat })));
-const Beams = lazy(() => import('~/components/Beams'));
 
 export const meta: MetaFunction = () => {
   return [
@@ -27,32 +26,10 @@ export default function Index() {
   const isChatRoute = location.pathname.startsWith('/chat');
 
   return (
-    <div className="relative flex flex-col min-h-screen w-full bg-[#0b0b0c] text-gray-200 overflow-hidden">
-      {/* Landing-only background */}
-      {!isChatRoute && (
-        <ClientOnly>
-          {() => (
-            <Suspense fallback={null}>
-              <div className="pointer-events-none absolute inset-0 z-0">
-                <Beams
-                  beamWidth={2}
-                  beamHeight={15}
-                  beamNumber={12}
-                  lightColor="#a8ffcc"
-                  speed={2}
-                  noiseIntensity={1.75}
-                  scale={0.2}
-                  rotation={0}
-                />
-              </div>
-            </Suspense>
-          )}
-        </ClientOnly>
-      )}
-
+    <div className="relative flex flex-col min-h-screen w-full text-gray-200 overflow-hidden">
       <div className="relative z-10 flex-1 flex flex-col min-h-0">
         <Header />
-        <main className="flex-1 flex flex-col min-h-0">
+        <main className="flex-1 flex flex-col min-h-0" style={{ paddingTop: 'var(--header-height)' }}>
           <div className="flex-1 min-h-0">
             <ClientOnly fallback={<BaseChat />}>
               {() => (

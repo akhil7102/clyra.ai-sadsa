@@ -28,9 +28,10 @@ import { ChatBox } from './ChatBox';
 import type { DesignScheme } from '~/types/design-scheme';
 import type { ElementInfo } from '~/components/workbench/Inspector';
 import LlmErrorAlert from './LLMApiAlert';
-import { SignedIn, SignedOut } from '@clerk/remix';
 import { Link, useLocation } from '@remix-run/react';
+import { useUser } from '~/lib/auth/supabase-client';
 import { chatId as chatIdAtom } from '~/lib/persistence/useChatHistory';
+import { workbenchStore } from '~/lib/stores/workbench';
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -147,7 +148,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [chatLeft, setChatLeft] = useState(0);
     const [chatWidth, setChatWidth] = useState(0);
     const location = typeof window === 'undefined' ? { pathname: '' } : useLocation();
-    const isChatRoute = !!location && typeof location.pathname === 'string' && location.pathname.startsWith('/chat');
+    const isChatRoute = location.pathname.startsWith('/chat');
+    const showWorkbench = useStore(workbenchStore.showWorkbench);
+    const user = useUser();
 
     React.useEffect(() => {
       if (!(chatStarted || isChatRoute)) {
@@ -441,7 +444,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   </p>
                   {/* Intro composer under tagline */}
                   <div className="max-w-chat mx-auto z-prompt">
-                    <SignedIn>
+                    {user ? (
                       <ChatBox
                         isModelSettingsCollapsed={isModelSettingsCollapsed}
                         setIsModelSettingsCollapsed={setIsModelSettingsCollapsed}
@@ -487,39 +490,54 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         setSelectedElement={setSelectedElement}
                         alignLeft
                       />
-                    </SignedIn>
-                    <SignedOut>
+                    ) : (
                       <div className="mx-auto max-w-md rounded-xl border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 p-6 text-center">
                         <p className="text-bolt-elements-textPrimary mb-4">Please sign in to start chatting.</p>
                         <Link className="inline-flex items-center gap-2 rounded-lg px-4 py-2 border border-accent-200/60 text-accent-600 hover:bg-white/10 transition-colors" to="/sign-in">
                           <span className="i-ph:sign-in" /> Sign In
                         </Link>
                       </div>
-                    </SignedOut>
+                    )}
                   </div>
                 </div>
                 {/* Footer removed */}
               </div>
             )}
             {(chatStarted || isChatRoute) && (
-              <div className={classNames('relative flex-1 min-h-0 flex flex-col')}
-                   style={{ position: 'relative' }}>
-                {/* Subtle glow behind chat section */}
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-bolt-elements-background-depth-2/40 to-transparent blur-2xl" />
+              <div 
+                className={classNames('relative flex-1 min-h-0 flex flex-col', showWorkbench ? '' : 'w-full')}
+                style={showWorkbench ? { width: 'var(--chat-width)', maxWidth: 'var(--chat-width)' } : undefined}
+              >
+                {/* Semi-circular radial gradient background */}
+                <div 
+                  className="pointer-events-none absolute inset-0 z-0"
+                  style={{
+                    background: 'radial-gradient(ellipse 80% 50% at 50% 110%, rgba(6, 182, 212, 0.25) 0%, rgba(59, 130, 246, 0.15) 30%, transparent 70%)',
+                  }}
+                />
+                {/* Additional glow layer */}
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-bolt-elements-background-depth-2/40 to-transparent blur-2xl z-0" />
 
                 {/* Scrollable messages area */}
                 <StickToBottom
-                  className={classNames('pt-6 px-2 sm:px-6 relative flex-1 min-h-0 flex flex-col overflow-y-auto modern-scrollbar')}
+                  className={classNames(
+                    'pt-6 relative flex-1 min-h-0 flex flex-col overflow-y-auto overflow-x-hidden modern-scrollbar z-[1]',
+                    showWorkbench ? 'pl-2' : 'px-2 sm:px-6'
+                  )}
+                  style={showWorkbench ? { paddingBottom: '200px', paddingRight: '45px' } : { paddingBottom: '200px' }}
                   resize="smooth"
                   initial="smooth"
                 >
                   <StickToBottom.Content
-                    className={classNames('flex flex-col items-start gap-4 relative')}
+                    className={classNames('flex flex-col gap-4 relative w-full', showWorkbench ? 'items-start' : 'items-center')}
                   >
                     <ClientOnly>
                       {() => {
                         return chatStarted ? (
-                          <div ref={chatContentRef} className="w-full">
+                          <div ref={chatContentRef} className={classNames(
+                            'w-full overflow-hidden',
+                            showWorkbench ? 'max-w-full' : 'max-w-chat mx-auto'
+                          )}>
                             <Messages
                               className="flex flex-col w-full flex-1 pb-4 z-1"
                               messages={messages}
@@ -536,107 +554,122 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       }}
                     </ClientOnly>
                     <ScrollToBottom offset={promptHeight} />
-
-                    {/* Alerts and Chat composer inside the scrollable content so it scrolls with messages */}
-                    <div className="w-full">
-                      <div className="px-2">
-                        <div className="flex flex-col gap-2 mb-2">
-                          {deployAlert && (
-                            <DeployChatAlert
-                              alert={deployAlert}
-                              clearAlert={() => clearDeployAlert?.()}
-                              postMessage={(message: string | undefined) => {
-                                sendMessage?.({} as any, message);
-                                clearSupabaseAlert?.();
-                              }}
-                            />
-                          )}
-                          {supabaseAlert && (
-                            <SupabaseChatAlert
-                              alert={supabaseAlert}
-                              clearAlert={() => clearSupabaseAlert?.()}
-                              postMessage={(message) => {
-                                sendMessage?.({} as any, message);
-                                clearSupabaseAlert?.();
-                              }}
-                            />
-                          )}
-                          {actionAlert && (
-                            <ChatAlert
-                              alert={actionAlert}
-                              clearAlert={() => clearAlert?.()}
-                              postMessage={(message) => {
-                                sendMessage?.({} as any, message);
-                                clearAlert?.();
-                              }}
-                            />
-                          )}
-                          {llmErrorAlert && <LlmErrorAlert alert={llmErrorAlert} clearAlert={() => clearLlmErrorAlert?.()} />}
-                        </div>
-                      </div>
-                      {/* Composer inside content: anchored under messages, left-aligned */}
-                      <div ref={promptWrapperRef} className="mt-4 px-2 flex justify-start">
-                        <SignedIn>
-                          <ChatBox
-                            isModelSettingsCollapsed={isModelSettingsCollapsed}
-                            setIsModelSettingsCollapsed={setIsModelSettingsCollapsed}
-                            provider={provider}
-                            setProvider={setProvider}
-                            providerList={providerList || (PROVIDER_LIST as ProviderInfo[])}
-                            model={model}
-                            setModel={setModel}
-                            modelList={modelList}
-                            apiKeys={apiKeys}
-                            isModelLoading={isModelLoading}
-                            onApiKeysChange={onApiKeysChange}
-                            uploadedFiles={uploadedFiles}
-                            setUploadedFiles={setUploadedFiles}
-                            imageDataList={imageDataList}
-                            setImageDataList={setImageDataList}
-                            textareaRef={textareaRef}
-                            input={input}
-                            handleInputChange={handleInputChange}
-                            handlePaste={handlePaste}
-                            TEXTAREA_MIN_HEIGHT={TEXTAREA_MIN_HEIGHT}
-                            TEXTAREA_MAX_HEIGHT={TEXTAREA_MAX_HEIGHT}
-                            isStreaming={isStreaming}
-                            handleStop={handleStop}
-                            handleSendMessage={(event, messageInput) => {
-                              sendMessage?.(event, messageInput);
-                            }}
-                            enhancingPrompt={enhancingPrompt}
-                            enhancePrompt={enhancePrompt}
-                            isListening={isListening}
-                            startListening={startListening}
-                            stopListening={stopListening}
-                            chatStarted={chatStarted}
-                            exportChat={exportChat}
-                            qrModalOpen={qrModalOpen}
-                            setQrModalOpen={setQrModalOpen}
-                            handleFileUpload={handleFileUpload}
-                            chatMode={chatMode}
-                            setChatMode={setChatMode}
-                            designScheme={designScheme}
-                            setDesignScheme={setDesignScheme}
-                            selectedElement={selectedElement}
-                            setSelectedElement={setSelectedElement}
-                            alignLeft
-                          />
-                        </SignedIn>
-                        <SignedOut>
-                          <div className="rounded-xl border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 p-4 text-left">
-                            <p className="text-bolt-elements-textPrimary">Sign in to send messages.</p>
-                            <div className="mt-2">
-                              <Link className="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 border border-accent-200/60 text-accent-600 hover:bg-white/10 transition-colors" to="/sign-in">
-                                <span className="i-ph:sign-in" /> Sign In
-                              </Link>
-                            </div>
-                          </div>
-                        </SignedOut>
-                      </div>
-                    </div>
                   </StickToBottom.Content>
                 </StickToBottom>
+
+                {/* Fixed chat composer at bottom */}
+                <div 
+                  className={classNames(
+                    'fixed z-10 transition-all duration-300 pointer-events-none',
+                    showWorkbench ? 'left-0' : 'left-0 right-0'
+                  )}
+                  style={{
+                    bottom: 0,
+                    width: showWorkbench ? 'var(--chat-width)' : '100%',
+                    maxWidth: showWorkbench ? 'var(--chat-width)' : '100%',
+                  }}
+                >
+                  <div 
+                    className={classNames(
+                      'pt-4 pointer-events-auto',
+                      showWorkbench ? 'w-full pl-2' : 'w-full max-w-chat mx-auto px-4'
+                    )}
+                    style={showWorkbench ? { paddingRight: '45px' } : undefined}
+                  >
+                    {/* Alerts */}
+                    <div className="flex flex-col gap-2 mb-2">
+                      {deployAlert && (
+                        <DeployChatAlert
+                          alert={deployAlert}
+                          clearAlert={() => clearDeployAlert?.()}
+                          postMessage={(message: string | undefined) => {
+                            sendMessage?.({} as any, message);
+                            clearSupabaseAlert?.();
+                          }}
+                        />
+                      )}
+                      {supabaseAlert && (
+                        <SupabaseChatAlert
+                          alert={supabaseAlert}
+                          clearAlert={() => clearSupabaseAlert?.()}
+                          postMessage={(message) => {
+                            sendMessage?.({} as any, message);
+                            clearSupabaseAlert?.();
+                          }}
+                        />
+                      )}
+                      {actionAlert && (
+                        <ChatAlert
+                          alert={actionAlert}
+                          clearAlert={() => clearAlert?.()}
+                          postMessage={(message) => {
+                            sendMessage?.({} as any, message);
+                            clearAlert?.();
+                          }}
+                        />
+                      )}
+                      {llmErrorAlert && <LlmErrorAlert alert={llmErrorAlert} clearAlert={() => clearLlmErrorAlert?.()} />}
+                    </div>
+                    
+                    {/* Chat input box */}
+                    <div ref={promptWrapperRef}>
+                      {user ? (
+                        <ChatBox
+                          isModelSettingsCollapsed={isModelSettingsCollapsed}
+                          setIsModelSettingsCollapsed={setIsModelSettingsCollapsed}
+                          provider={provider}
+                          setProvider={setProvider}
+                          providerList={providerList || (PROVIDER_LIST as ProviderInfo[])}
+                          model={model}
+                          setModel={setModel}
+                          modelList={modelList}
+                          apiKeys={apiKeys}
+                          isModelLoading={isModelLoading}
+                          onApiKeysChange={onApiKeysChange}
+                          uploadedFiles={uploadedFiles}
+                          setUploadedFiles={setUploadedFiles}
+                          imageDataList={imageDataList}
+                          setImageDataList={setImageDataList}
+                          textareaRef={textareaRef}
+                          input={input}
+                          handleInputChange={handleInputChange}
+                          handlePaste={handlePaste}
+                          TEXTAREA_MIN_HEIGHT={TEXTAREA_MIN_HEIGHT}
+                          TEXTAREA_MAX_HEIGHT={TEXTAREA_MAX_HEIGHT}
+                          isStreaming={isStreaming}
+                          handleStop={handleStop}
+                          handleSendMessage={(event, messageInput) => {
+                            sendMessage?.(event, messageInput);
+                          }}
+                          enhancingPrompt={enhancingPrompt}
+                          enhancePrompt={enhancePrompt}
+                          isListening={isListening}
+                          startListening={startListening}
+                          stopListening={stopListening}
+                          chatStarted={chatStarted}
+                          exportChat={exportChat}
+                          qrModalOpen={qrModalOpen}
+                          setQrModalOpen={setQrModalOpen}
+                          handleFileUpload={handleFileUpload}
+                          chatMode={chatMode}
+                          setChatMode={setChatMode}
+                          designScheme={designScheme}
+                          setDesignScheme={setDesignScheme}
+                          selectedElement={selectedElement}
+                          setSelectedElement={setSelectedElement}
+                          alignLeft={showWorkbench}
+                        />
+                      ) : (
+                        <div className="rounded-xl border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 p-4 text-center">
+                          <p className="text-bolt-elements-textPrimary mb-2">Sign in to send messages.</p>
+                          <Link className="inline-flex items-center gap-1 text-sm text-accent-600 hover:text-accent-500" to="/sign-in">
+                            <span className="i-ph:sign-in" /> Sign In
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
             
@@ -665,7 +698,7 @@ function ScrollToBottom({ offset = 0 }: { offset?: number }) {
           style={{ bottom: offset }}
         />
         <button
-          className="sticky z-[101] ml-auto mr-3 sm:mr-6 rounded-full p-2 flex items-center justify-center bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor text-bolt-elements-textPrimary shadow-md hover:bg-bolt-elements-background-depth-3"
+          className="sticky z-[101] ml-auto mr-3 sm:mr-6 rounded-full p-2 flex items-center justify-center bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-3"
           style={{ bottom: offset }}
           onClick={() => scrollToBottom()}
           title="Go to last message"

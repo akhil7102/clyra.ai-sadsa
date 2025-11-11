@@ -124,6 +124,17 @@ export default function Gallery() {
       title="Gallery" 
       description="A visual showcase of screenshots, UI previews, themes, templates, demo videos, or user-created content. This section helps users understand the design, capabilities, and style of your product."
     >
+      {/* Submit Project CTA */}
+      <div className="mb-8 bg-gradient-to-r from-cyan-500/10 to-blue-600/10 backdrop-blur-md rounded-2xl border border-cyan-500/20 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h3 className="text-xl font-bold text-white mb-1">Built something amazing?</h3>
+          <p className="text-gray-400">Share your project with the Clyra.ai community</p>
+        </div>
+        <button className="px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-bold rounded-xl hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] transition-all duration-200 transform hover:scale-105 whitespace-nowrap">
+          Submit Project
+        </button>
+      </div>
+
       {/* Controls */}
       <div className="mb-8 flex flex-col sm:flex-row gap-4 justify-between items-center">
         <div className="flex flex-wrap gap-2 justify-center">
@@ -133,8 +144,8 @@ export default function Gallery() {
               onClick={() => setSelectedCategory(category)}
               className={`px-4 py-2 rounded-full font-medium transition-all duration-200 ${
                 selectedCategory === category
-                  ? 'bg-gradient-to-r from-[#4DA8FF] to-[#2C8CFF] text-white shadow-md'
-                  : 'bg-white/80 dark:bg-gray-900/80 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary border border-accent-200/60 hover:border-[#4DA8FF]'
+                  ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white shadow-md shadow-cyan-500/20'
+                  : 'bg-black/40 backdrop-blur-md text-gray-300 hover:text-white border border-gray-700/50 hover:border-cyan-400/50'
               }`}
             >
               {category}
@@ -142,13 +153,13 @@ export default function Gallery() {
           ))}
         </div>
         
-        <div className="flex gap-2 bg-white/80 dark:bg-gray-900/80 rounded-xl p-1 border border-accent-200/60">
+        <div className="flex gap-2 bg-black/40 backdrop-blur-md rounded-xl p-1 border border-gray-700/50">
           <button
             onClick={() => setViewMode('masonry')}
             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
               viewMode === 'masonry'
-                ? 'bg-gradient-to-r from-[#4DA8FF] to-[#2C8CFF] text-white'
-                : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary'
+                ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white'
+                : 'text-gray-300 hover:text-white'
             }`}
           >
             Masonry
@@ -157,8 +168,8 @@ export default function Gallery() {
             onClick={() => setViewMode('grid')}
             className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
               viewMode === 'grid'
-                ? 'bg-gradient-to-r from-[#4DA8FF] to-[#2C8CFF] text-white'
-                : 'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary'
+                ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white'
+                : 'text-gray-300 hover:text-white'
             }`}
           >
             Grid
@@ -169,12 +180,12 @@ export default function Gallery() {
       {/* Featured Projects */}
       {featuredProjects.length > 0 && (
         <div className="mb-12">
-          <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-6">Featured Projects</h3>
+          <h3 className="text-2xl font-bold text-white mb-6">Featured Projects</h3>
           <div className="grid md:grid-cols-2 gap-6">
             {featuredProjects.map((project) => (
               <div 
                 key={project.id}
-                className="group relative bg-gradient-to-br from-[#4DA8FF]/10 to-[#2C8CFF]/10 rounded-2xl border border-accent-200/60 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                className="group relative bg-gradient-to-br from-cyan-500/10 to-blue-600/10 backdrop-blur-md rounded-2xl border border-cyan-500/20 overflow-hidden shadow-lg hover:shadow-[0_0_40px_rgba(6,182,212,0.4)] transition-all duration-300"
               >
                 <div className="relative h-64">
                   <img 
@@ -184,31 +195,31 @@ export default function Gallery() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-gradient-to-r from-[#4DA8FF] to-[#2C8CFF] text-white text-sm font-semibold rounded-full">
+                    <span className="px-3 py-1 bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-sm font-semibold rounded-full shadow-md shadow-cyan-500/20">
                       Featured
                     </span>
                   </div>
                   <div className="absolute top-4 right-4">
-                    <span className="px-3 py-1 bg-white/90 dark:bg-gray-800/90 text-bolt-elements-textPrimary text-sm font-semibold rounded-full backdrop-blur-sm">
+                    <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-sm font-semibold rounded-full border border-gray-700/50">
                       {project.category}
                     </span>
                   </div>
                 </div>
                 
                 <div className="p-6">
-                  <h4 className="text-xl font-bold text-bolt-elements-textPrimary mb-2">
+                  <h4 className="text-xl font-bold text-white mb-2">
                     {project.title}
                   </h4>
-                  <p className="text-bolt-elements-textSecondary mb-4">
+                  <p className="text-gray-400 mb-4">
                     {project.description}
                   </p>
                   
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-sm text-bolt-elements-textPrimary font-medium">
+                    <p className="text-sm text-white font-medium">
                       by {project.author}
                     </p>
-                    <div className="flex items-center gap-4 text-sm text-bolt-elements-textSecondary">
-                      <span className="flex items-center gap-1">
+                    <div className="flex items-center gap-4 text-sm text-gray-400">
+                      <span className="flex items-center gap-1 hover:text-cyan-400 transition-colors cursor-pointer">
                         <span className="i-ph:heart"></span>
                         {project.likes}
                       </span>
@@ -219,7 +230,7 @@ export default function Gallery() {
                     </div>
                   </div>
                   
-                  <button className="w-full px-4 py-2 bg-gradient-to-r from-[#4DA8FF] to-[#2C8CFF] text-white font-semibold rounded-lg hover:shadow-md transition-all duration-200">
+                  <button className="w-full px-4 py-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold rounded-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] transition-all duration-200">
                     View Project
                   </button>
                 </div>
@@ -231,7 +242,7 @@ export default function Gallery() {
 
       {/* Regular Projects */}
       <div className="mb-8">
-        <h3 className="text-2xl font-bold text-bolt-elements-textPrimary mb-6">
+        <h3 className="text-2xl font-bold text-white mb-6">
           All Projects ({regularProjects.length})
         </h3>
         
@@ -243,7 +254,7 @@ export default function Gallery() {
           {regularProjects.map((project) => (
             <div 
               key={project.id}
-              className={`group bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-2xl border border-accent-200/60 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${
+              className={`group bg-black/40 backdrop-blur-md rounded-2xl border border-gray-700/50 overflow-hidden shadow-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:border-cyan-400/50 transition-all duration-300 hover:-translate-y-1 ${
                 viewMode === 'masonry' ? 'break-inside-avoid' : ''
               }`}
             >
@@ -255,26 +266,26 @@ export default function Gallery() {
                   style={{ height: viewMode === 'masonry' ? 'auto' : '200px' }}
                 />
                 <div className="absolute top-3 right-3">
-                  <span className="px-2 py-1 bg-white/90 dark:bg-gray-800/90 text-bolt-elements-textPrimary text-xs font-semibold rounded-full backdrop-blur-sm">
+                  <span className="px-2 py-1 bg-black/60 backdrop-blur-md text-white text-xs font-semibold rounded-full border border-gray-700/50">
                     {project.category}
                   </span>
                 </div>
               </div>
               
               <div className="p-4">
-                <h4 className="text-lg font-bold text-bolt-elements-textPrimary mb-2 line-clamp-2">
+                <h4 className="text-lg font-bold text-white mb-2 line-clamp-2">
                   {project.title}
                 </h4>
-                <p className="text-sm text-bolt-elements-textSecondary mb-3 line-clamp-2">
+                <p className="text-sm text-gray-400 mb-3 line-clamp-2">
                   {project.description}
                 </p>
                 
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs text-bolt-elements-textPrimary font-medium truncate">
+                  <p className="text-xs text-white font-medium truncate">
                     {project.author}
                   </p>
-                  <div className="flex items-center gap-3 text-xs text-bolt-elements-textSecondary">
-                    <span className="flex items-center gap-1">
+                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                    <span className="flex items-center gap-1 hover:text-cyan-400 transition-colors cursor-pointer">
                       <span className="i-ph:heart text-xs"></span>
                       {project.likes}
                     </span>
@@ -285,7 +296,7 @@ export default function Gallery() {
                   </div>
                 </div>
                 
-                <button className="w-full px-3 py-2 bg-gradient-to-r from-[#4DA8FF]/10 to-[#2C8CFF]/10 text-[#4DA8FF] font-semibold rounded-lg hover:from-[#4DA8FF] hover:to-[#2C8CFF] hover:text-white transition-all duration-200 border border-[#4DA8FF]/30">
+                <button className="w-full px-3 py-2 bg-gradient-to-r from-cyan-400/10 to-blue-500/10 text-cyan-400 font-semibold rounded-lg hover:from-cyan-400 hover:to-blue-500 hover:text-white transition-all duration-200 border border-cyan-400/30">
                   View Project
                 </button>
               </div>
@@ -296,7 +307,7 @@ export default function Gallery() {
 
       {/* Load More */}
       <div className="text-center">
-        <button className="px-8 py-3 bg-white/80 dark:bg-gray-900/80 text-bolt-elements-textPrimary font-semibold rounded-xl border border-accent-200/60 hover:border-[#4DA8FF] hover:bg-gradient-to-r hover:from-[#4DA8FF]/10 hover:to-[#2C8CFF]/10 transition-all duration-200">
+        <button className="px-8 py-3 bg-black/40 backdrop-blur-md text-white font-semibold rounded-xl border border-gray-700/50 hover:border-cyan-400 hover:bg-gradient-to-r hover:from-cyan-400/10 hover:to-blue-500/10 transition-all duration-200">
           Load More Projects
         </button>
       </div>

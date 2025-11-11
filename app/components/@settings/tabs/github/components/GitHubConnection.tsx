@@ -61,24 +61,7 @@ export function GitHubConnection({ connectionTest, onTestConnection }: GitHubCon
       transition={{ delay: 0.2 }}
     >
       <div className="p-6 space-y-6">
-        {!isConnected && (
-          <div className="text-xs text-bolt-elements-textSecondary bg-bolt-elements-background-depth-1 dark:bg-bolt-elements-background-depth-1 p-3 rounded-lg mb-4">
-            <p className="flex items-center gap-1 mb-1">
-              <span className="i-ph:lightbulb w-3.5 h-3.5 text-bolt-elements-icon-success dark:text-bolt-elements-icon-success" />
-              <span className="font-medium">Tip:</span> You can also set the{' '}
-              <code className="px-1 py-0.5 bg-bolt-elements-background-depth-2 dark:bg-bolt-elements-background-depth-2 rounded">
-                VITE_GITHUB_ACCESS_TOKEN
-              </code>{' '}
-              environment variable to connect automatically.
-            </p>
-            <p>
-              For fine-grained tokens, also set{' '}
-              <code className="px-1 py-0.5 bg-bolt-elements-background-depth-2 dark:bg-bolt-elements-background-depth-2 rounded">
-                VITE_GITHUB_TOKEN_TYPE=fine-grained
-              </code>
-            </p>
-          </div>
-        )}
+        
 
         <form onSubmit={handleConnect} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

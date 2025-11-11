@@ -60,3 +60,15 @@
   fill: url(#shine-gradient);
   mix-blend-mode: overlay;
 }
+
+/* Hide scrollbar but keep scroll functionality */
+.HideScrollbar {
+  overflow: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and old Edge */
+}
+
+.HideScrollbar::-webkit-scrollbar { /* Chrome, Safari */
+  width: 0;
+  height: 0;
+}

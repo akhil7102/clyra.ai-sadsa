@@ -10,6 +10,9 @@ $code-font-size: 13px;
 .MarkdownContent {
   line-height: 1.6;
   color: var(--bolt-elements-textPrimary);
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 
   > *:not(:last-child) {
     margin-block-end: 16px;
@@ -100,6 +103,7 @@ $code-font-size: 13px;
     background: transparent;
     overflow-x: auto;
     min-width: 0;
+    max-width: 100%;
   }
 
   blockquote {
@@ -157,7 +161,10 @@ $code-font-size: 13px;
   table {
     border-collapse: collapse;
     width: 100%;
+    max-width: 100%;
     margin-block-end: 16px;
+    display: block;
+    overflow-x: auto;
 
     :is(th, td) {
       padding: 6px 13px;
