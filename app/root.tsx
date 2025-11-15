@@ -189,8 +189,6 @@ function LayoutClient({ children }: { children: React.ReactNode }) {
   );
 }
 
-import { logStore } from './lib/stores/logs';
-
 function App() {
   const { user, env } = useLoaderData<typeof loader>();
 
