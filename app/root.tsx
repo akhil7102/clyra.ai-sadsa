@@ -183,7 +183,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 import { logStore } from './lib/stores/logs';
 
-function App() {
+function ClientAppRoot() {
   const theme = useStore(themeStore);
   const { user, env } = useLoaderData<typeof loader>();
 
@@ -227,6 +227,14 @@ function App() {
         </Layout>
       </SupabaseProvider>
     </>
+  );
+}
+
+function App() {
+  return (
+    <ClientOnly>
+      {() => <ClientAppRoot />}
+    </ClientOnly>
   );
 }
 
