@@ -183,9 +183,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 import { logStore } from './lib/stores/logs';
 
-function ClientAppRoot() {
-  const theme = useStore(themeStore);
+function App() {
   const { user, env } = useLoaderData<typeof loader>();
+
+  return (
+    <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.ENV = ${JSON.stringify(env)}`,
+        }}
+      />
+      <SupabaseProvider serverSession={user}>
+        <ClientOnly>
+          {() => <AppContent />}
+        </ClientOnly>
+      </SupabaseProvider>
+    </>
+  );
+}
+
+function AppContent() {
+  const theme = useStore(themeStore);
 
   useEffect(() => {
     logStore.logSystem('Application initialized', {
@@ -212,29 +230,12 @@ function ClientAppRoot() {
       .catch((error) => {
         logStore.logError('Failed to initialize debug logging', error);
       });
-  }, []);
+  }, [theme]);
 
   return (
-    <>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `window.ENV = ${JSON.stringify(env)}`,
-        }}
-      />
-      <SupabaseProvider serverSession={user}>
-        <Layout>
-          <Outlet />
-        </Layout>
-      </SupabaseProvider>
-    </>
-  );
-}
-
-function App() {
-  return (
-    <ClientOnly>
-      {() => <ClientAppRoot />}
-    </ClientOnly>
+    <Layout>
+      <Outlet />
+    </Layout>
   );
 }
 
