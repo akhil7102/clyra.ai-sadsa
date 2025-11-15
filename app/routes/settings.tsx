@@ -1,11 +1,13 @@
 import { json, redirect, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 import { PageLayout } from '~/components/layout/PageLayout';
 import SettingsTab from '~/components/@settings/tabs/settings/SettingsTab';
-import { getAuthUser } from '~/lib/auth/supabase-auth.server';
+import { getAuth } from '@clerk/remix/ssr.server';
 
 export const loader = async (args: LoaderFunctionArgs) => {
-  const { user } = await getAuthUser(args);
-  if (!user) return redirect('/sign-in');
+  const { isSignedIn } = await getAuth(args);
+  if (!isSignedIn) {
+    return redirect('/');
+  }
   return json({});
 };
 

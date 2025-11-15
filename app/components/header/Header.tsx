@@ -3,11 +3,22 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Link, useNavigate } from '@remix-run/react';
 import { chatStore } from '~/lib/stores/chat';
-import { useUser, useSupabase } from '~/lib/auth/supabase-client';
 import { classNames } from '~/utils/classNames';
 const HeaderActionButtons = lazy(() => import('./HeaderActionButtons.client').then(m => ({ default: m.HeaderActionButtons })));
 import { ControlPanel } from '~/components/@settings/core/ControlPanel';
 const HistoryDropdown = lazy(() => import('./HistoryDropdown.client').then(m => ({ default: m.HistoryDropdown })));
+type HistoryDropdownProps = { open: boolean; onClose: () => void; };
+
+// Import Clerk components
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+  useUser,
+  useClerk
+} from "@clerk/remix";
 
 export function Header() {
   const chat = useStore(chatStore);
@@ -15,21 +26,19 @@ export function Header() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
   const resourcesRef = useRef<HTMLLIElement | null>(null);
-  const accountRef = useRef<HTMLDivElement | null>(null);
-  const user = useUser();
-  const { supabase } = useSupabase();
   const navigate = useNavigate();
-  const displayName = user?.email?.split('@')[0] || 'User';
-  const avatarInitial = (displayName?.charAt(0) || 'U').toUpperCase();
   
+  // Get user from Clerk
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  
+  // Handle sign out
   const handleSignOut = async () => {
-    if (supabase) {
-      await supabase.auth.signOut();
-      navigate('/sign-in');
-    }
+    await signOut();
+    navigate('/');
   };
+  
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -44,9 +53,6 @@ export function Header() {
       const target = e.target as Node | null;
       if (resourcesRef.current && target && !resourcesRef.current.contains(target)) {
         setResourcesOpen(false);
-      }
-      if (accountRef.current && target && !accountRef.current.contains(target)) {
-        setAccountOpen(false);
       }
     };
     document.addEventListener('mousedown', onDocClick);
@@ -161,99 +167,57 @@ export function Header() {
             </ul>
           </nav>
 
-          {/* Right Side - Auth & Account */}
+          {/* Right Side - Auth & Actions */}
           <div className="hidden md:flex items-center gap-4">
-            {!user ? (
-              <>
-                <Link 
-                  to="/sign-in" 
-                  className="text-gray-300 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-200"
-                >
-                  Sign In
-                </Link>
-                <Link 
-                  to="/sign-up" 
-                  className="relative overflow-hidden group bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-4 py-2 rounded-lg transition-all duration-200 border-0"
-                >
-                  <span className="relative z-10">Sign Up</span>
-                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity" />
-                </Link>
-              </>
-            ) : (
-              <div className="relative" ref={accountRef}>
-                <button
-                  type="button"
-                  className="flex items-center gap-2 rounded-full px-3 py-2 transition-all hover:bg-white/10 border"
-                  style={{ 
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                  }}
-                  onClick={() => setAccountOpen((v) => !v)}
-                >
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm"
-                    style={{
-                      background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
-                      boxShadow: '0 0 24px rgba(6, 182, 212, 0.5)',
-                    }}
-                  >
-                    {avatarInitial}
-                  </div>
-                  <span className="hidden sm:inline text-white font-medium">{displayName}</span>
-                  <span className={classNames('i-ph:caret-down transition-transform text-white/60', { 'rotate-180': accountOpen })} />
-                </button>
-                {accountOpen && (
-                  <div
-                    className="absolute right-0 mt-3 w-60 rounded-xl backdrop-blur-xl shadow-2xl overflow-hidden"
-                    style={{
-                      background: 'rgba(10, 10, 10, 0.95)',
-                      border: '1px solid rgba(59, 130, 246, 0.3)',
-                      boxShadow: '0 0 40px rgba(59, 130, 246, 0.2)',
-                    }}
-                  >
-                    <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                      <p className="text-[10px] uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-                        Signed in as
-                      </p>
-                      <p className="text-sm font-semibold mt-1" style={{ color: '#3b82f6' }}>
-                        {displayName}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setSettingsOpen(true);
-                        setAccountOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[rgba(59,130,246,0.1)] transition-all bg-transparent border-0 outline-none cursor-pointer"
-                      style={{ color: 'rgba(255, 255, 255, 0.9)' }}
-                    >
-                      <span className="i-ph:gear-six text-lg" />
-                      <span className="font-medium">Settings</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setHistoryOpen((v) => !v);
-                        setAccountOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-[rgba(59,130,246,0.1)] transition-all bg-transparent border-0 outline-none cursor-pointer"
-                      style={{ color: 'rgba(255, 255, 255, 0.9)' }}
-                    >
-                      <span className="i-ph:clock text-lg" />
-                      <span className="font-medium">History</span>
-                    </button>
-                    <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', margin: '0.5rem 0' }} />
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-red-500/10 transition-all bg-transparent border-0 outline-none cursor-pointer"
-                      style={{ color: '#ef4444' }}
-                    >
-                      <span className="i-ph:sign-out text-lg" />
-                      <span className="font-medium">Sign Out</span>
-                    </button>
-                  </div>
-                )}
+            <SignedOut>
+              {/* Show Sign In/Up buttons when signed out */}
+              <div className="flex items-center gap-2">
+                <SignInButton mode="modal">
+                  <button className="text-gray-200 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="relative overflow-hidden group bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-4 py-2 rounded-lg transition-all duration-200 border-0">
+                    <span className="relative z-10">Sign Up</span>
+                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity" />
+                  </button>
+                </SignUpButton>
               </div>
-            )}
+            </SignedOut>
+            
+            <SignedIn>
+              {/* Show user account when signed in */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setSettingsOpen(true)}
+                  className="text-gray-200 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white px-3 py-1.5 rounded-lg transition-colors duration-200 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span className="i-ph:gear-six text-lg" />
+                  <span className="text-sm">Settings</span>
+                </button>
+                
+                <button
+                  onClick={() => setHistoryOpen(v => !v)}
+                  className="text-gray-200 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white px-3 py-1.5 rounded-lg transition-colors duration-200 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span className="i-ph:clock text-lg" />
+                  <span className="text-sm">History</span>
+                </button>
+                
+                <UserButton
+                  afterSignOutUrl="/"
+                  userProfileMode="modal"
+                  appearance={{
+                    elements: {
+                      userButtonAvatarBox: "w-9 h-9",
+                      userButtonBox: "hover:bg-white/10 rounded-full transition-colors"
+                    }
+                  }}
+                />
+              </div>
+            </SignedIn>
+            
             {chat.started && (
               <ClientOnly>
                 {() => (
@@ -269,7 +233,7 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-gray-300 hover:text-white transition-colors"
+            className="md:hidden p-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
           >
@@ -307,23 +271,29 @@ export function Header() {
               <Link to="/gallery" className="text-gray-300 hover:text-cyan-400 transition-colors px-2 py-2" onClick={() => setMobileOpen(false)}>
                 Community Showcase
               </Link>
-              {!user ? (
+              <SignedOut>
                 <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-white/10">
-                  <Link to="/sign-in" className="text-gray-300 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all text-center" onClick={() => setMobileOpen(false)}>
-                    Sign In
-                  </Link>
-                  <Link to="/sign-up" className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-4 py-2 rounded-lg transition-all text-center" onClick={() => setMobileOpen(false)}>
-                    Sign Up
-                  </Link>
+                  <SignInButton mode="modal">
+                    <button className="text-gray-200 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white px-4 py-2 rounded-lg transition-colors text-center w-full">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-4 py-2 rounded-lg transition-colors text-center w-full">
+                      Sign Up
+                    </button>
+                  </SignUpButton>
                 </div>
-              ) : (
+              </SignedOut>
+              
+              <SignedIn>
                 <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-white/10">
                   <button
                     onClick={() => {
                       setSettingsOpen(true);
                       setMobileOpen(false);
                     }}
-                    className="text-gray-300 hover:text-cyan-400 transition-colors px-2 py-2 text-left bg-transparent border-0 outline-none"
+                    className="text-gray-200 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white px-3 py-2 rounded-lg transition-colors text-left cursor-pointer"
                   >
                     Settings
                   </button>
@@ -332,7 +302,7 @@ export function Header() {
                       setHistoryOpen((v) => !v);
                       setMobileOpen(false);
                     }}
-                    className="text-gray-300 hover:text-cyan-400 transition-colors px-2 py-2 text-left bg-transparent border-0 outline-none"
+                    className="text-gray-200 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white px-3 py-2 rounded-lg transition-colors text-left cursor-pointer"
                   >
                     History
                   </button>
@@ -341,12 +311,12 @@ export function Header() {
                       handleSignOut();
                       setMobileOpen(false);
                     }}
-                    className="text-red-400 hover:text-red-300 transition-colors px-2 py-2 text-left bg-transparent border-0 outline-none"
+                    className="text-red-400 hover:text-red-300 transition-colors px-3 py-2 rounded-lg text-left bg-transparent border border-red-400/30 hover:bg-red-400/10 cursor-pointer"
                   >
                     Sign Out
                   </button>
                 </div>
-              )}
+              </SignedIn>
             </div>
           </div>
         )}

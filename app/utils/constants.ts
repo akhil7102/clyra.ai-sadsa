@@ -18,7 +18,8 @@ export const TOOL_EXECUTION_ERROR = 'Error: An error occured while calling tool'
 
 const llmManager = LLMManager.getInstance(import.meta.env);
 
-export const PROVIDER_LIST = llmManager.getAllProviders();
+const ALLOWED_PROVIDER_NAMES = new Set(['Google', 'OpenAI', 'Anthropic']);
+export const PROVIDER_LIST = llmManager.getAllProviders().filter((p) => ALLOWED_PROVIDER_NAMES.has(p.name));
 export const DEFAULT_PROVIDER =
   PROVIDER_LIST.find((p) => p.name === 'Google') || llmManager.getDefaultProvider();
 

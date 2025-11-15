@@ -1,78 +1,15 @@
-import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
-import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
-import { useState } from 'react';
-import { getAuthUser } from '~/lib/auth/supabase-auth.server';
-import { createSupabaseServerClient } from '~/lib/auth/supabase-auth.server';
-import { Header } from '~/components/header/Header';
+import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs, type MetaFunction } from '@remix-run/cloudflare';
 
-export const meta: MetaFunction = () => [
-  { title: 'Sign Up - Clyra.ai' },
-  { name: 'description', content: 'Create your Clyra.ai account' },
-];
+export const meta: MetaFunction = () => [];
 
-export const loader = async (args: LoaderFunctionArgs) => {
-  const { user } = await getAuthUser(args);
-  if (user) {
-    return redirect('/');
-  }
-  return json({});
-};
+export const loader = async (_args: LoaderFunctionArgs) => redirect('/');
 
-export const action = async (args: ActionFunctionArgs) => {
-  const formData = await args.request.formData();
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-  const confirmPassword = formData.get('confirmPassword') as string;
-
-  if (!email || !password || !confirmPassword) {
-    return json({ error: 'All fields are required' }, { status: 400 });
-  }
-
-  if (password !== confirmPassword) {
-    return json({ error: 'Passwords do not match' }, { status: 400 });
-  }
-
-  if (password.length < 6) {
-    return json({ error: 'Password must be at least 6 characters' }, { status: 400 });
-  }
-
-  try {
-    const env = (args as any)?.context?.cloudflare?.env;
-    const { supabase, headers } = createSupabaseServerClient(args.request, env);
-
-    console.log('Attempting to sign up user:', email);
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${new URL(args.request.url).origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      console.error('Supabase sign-up error:', error);
-      return json({ error: error.message }, { status: 400 });
-    }
-
-    console.log('Sign-up successful:', data);
-
-    // Redirect to sign-in with success message
-    return redirect('/sign-in?success=account-created', { headers });
-  } catch (error) {
-    console.error('Unexpected error during sign-up:', error);
-    return json({ error: 'An unexpected error occurred. Please try again.' }, { status: 500 });
-  }
-};
+export const action = async (_args: ActionFunctionArgs) => redirect('/');
 
 export default function SignUp() {
-  const actionData = useActionData<typeof action>();
-  const navigation = useNavigation();
-  const isSubmitting = navigation.state === 'submitting';
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  return (
+  return null;
+}
+function DeadCode(){ return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-black">

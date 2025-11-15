@@ -92,8 +92,8 @@ const NotificationsTab = () => {
     if (type === 'update') {
       return {
         icon: 'i-ph:arrow-circle-up',
-        color: 'text-purple-500 dark:text-purple-400',
-        bg: 'hover:bg-purple-500/10 dark:hover:bg-purple-500/20',
+        color: 'text-cyan-400 dark:text-cyan-300',
+        bg: 'hover:bg-cyan-400/10 dark:hover:bg-cyan-400/20',
       };
     }
 
@@ -159,9 +159,9 @@ const NotificationsTab = () => {
   };
 
   const filterOptions: { id: FilterType; label: string; icon: string; color: string }[] = [
-    { id: 'all', label: 'All Notifications', icon: 'i-ph:bell', color: '#9333ea' },
+    { id: 'all', label: 'All Notifications', icon: 'i-ph:bell', color: '#06b6d4' },
     { id: 'system', label: 'System', icon: 'i-ph:gear', color: '#6b7280' },
-    { id: 'update', label: 'Updates', icon: 'i-ph:arrow-circle-up', color: '#9333ea' },
+    { id: 'update', label: 'Updates', icon: 'i-ph:arrow-circle-up', color: '#06b6d4' },
     { id: 'error', label: 'Errors', icon: 'i-ph:warning-circle', color: '#ef4444' },
     { id: 'warning', label: 'Warnings', icon: 'i-ph:warning', color: '#f59e0b' },
     { id: 'info', label: 'Information', icon: 'i-ph:info', color: '#3b82f6' },
@@ -209,11 +209,11 @@ const NotificationsTab = () => {
                 >
                   <div className="mr-3 flex h-5 w-5 items-center justify-center">
                     <div
-                      className={classNames(option.icon, 'text-lg group-hover:text-purple-500 transition-colors')}
+                      className={classNames(option.icon, 'text-lg group-hover:text-cyan-400 transition-colors')}
                       style={{ color: option.color }}
                     />
                   </div>
-                  <span className="group-hover:text-purple-500 transition-colors">{option.label}</span>
+                  <span className="group-hover:text-cyan-400 transition-colors">{option.label}</span>
                 </DropdownMenu.Item>
               ))}
             </DropdownMenu.Content>
@@ -232,7 +232,7 @@ const NotificationsTab = () => {
             'transition-all duration-200',
           )}
         >
-          <span className="i-ph:trash text-lg text-gray-500 dark:text-gray-400 group-hover:text-purple-500 transition-colors" />
+          <span className="i-ph:trash text-lg text-gray-500 dark:text-gray-400 group-hover:text-cyan-400 transition-colors" />
           Clear All
         </button>
       </div>

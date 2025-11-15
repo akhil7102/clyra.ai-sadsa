@@ -120,6 +120,12 @@ export const ChatImpl = memo(
       const savedProvider = Cookies.get('selectedProvider');
       return (PROVIDER_LIST.find((p) => p.name === savedProvider) || DEFAULT_PROVIDER) as ProviderInfo;
     });
+    useEffect(() => {
+      if (provider?.name === 'Google' && model !== DEFAULT_MODEL) {
+        setModel(DEFAULT_MODEL);
+        Cookies.set('selectedModel', DEFAULT_MODEL, { expires: 30 });
+      }
+    }, [provider?.name, model]);
     const { showChat } = useStore(chatStore);
     const [animationScope, animate] = useAnimate();
     const [apiKeys, setApiKeys] = useState<Record<string, string>>({});

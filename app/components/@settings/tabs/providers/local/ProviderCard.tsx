@@ -55,7 +55,7 @@ function ProviderCard({
               <Icon
                 className={classNames(
                   'w-6 h-6 transition-all duration-300',
-                  provider.settings.enabled ? 'text-purple-500' : 'text-bolt-elements-textTertiary',
+                  provider.settings.enabled ? 'text-cyan-400' : 'text-bolt-elements-textTertiary',
                 )}
               />
             </div>
@@ -97,7 +97,7 @@ function ProviderCard({
                       className="w-full px-4 py-3 rounded-lg text-sm bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor hover:border-purple-500/30 hover:bg-bolt-elements-background-depth-4 hover:shadow-sm transition-all duration-200 text-left group"
                     >
                       <div className="flex items-center gap-3 text-bolt-elements-textSecondary group-hover:text-bolt-elements-textPrimary">
-                        <Link className="w-4 h-4 group-hover:text-purple-500 transition-colors" />
+                        <Link className="w-4 h-4 group-hover:text-cyan-400 transition-colors" />
                         <span className="font-mono">{provider.settings.baseUrl || 'Click to set base URL'}</span>
                       </div>
                     </button>

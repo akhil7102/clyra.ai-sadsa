@@ -131,35 +131,101 @@ export const ModelSelector = ({
   const providerDropdownRef = useRef<HTMLDivElement>(null);
   const [showFreeModelsOnly, setShowFreeModelsOnly] = useState(false);
 
-  // LOCK TO GEMINI: on mount, pick Google provider and a Gemini model and set them
+  const fallbackModelsByProvider = useMemo<Record<string, ModelInfo[]>>(
+    () => ({
+      Google: [
+        {
+          name: 'gemini-2.5-flash',
+          label: 'Gemini 2.5 Flash',
+          provider: 'Google',
+          maxTokenAllowed: 1000000,
+          maxCompletionTokens: 8192,
+        },
+        {
+          name: 'gemini-1.5-pro',
+          label: 'Gemini 1.5 Pro',
+          provider: 'Google',
+          maxTokenAllowed: 2000000,
+          maxCompletionTokens: 8192,
+        },
+        {
+          name: 'gemini-1.5-flash',
+          label: 'Gemini 1.5 Flash',
+          provider: 'Google',
+          maxTokenAllowed: 1000000,
+          maxCompletionTokens: 8192,
+        },
+      ],
+      OpenAI: [
+        { name: 'gpt-4o', label: 'GPT-4o', provider: 'OpenAI', maxTokenAllowed: 128000, maxCompletionTokens: 4096 },
+        {
+          name: 'gpt-4o-mini',
+          label: 'GPT-4o Mini',
+          provider: 'OpenAI',
+          maxTokenAllowed: 128000,
+          maxCompletionTokens: 4096,
+        },
+        {
+          name: 'gpt-4-turbo',
+          label: 'GPT-4 Turbo',
+          provider: 'OpenAI',
+          maxTokenAllowed: 128000,
+          maxCompletionTokens: 4096,
+        },
+        {
+          name: 'gpt-3.5-turbo',
+          label: 'GPT-3.5 Turbo',
+          provider: 'OpenAI',
+          maxTokenAllowed: 16000,
+          maxCompletionTokens: 4096,
+        },
+      ],
+      Anthropic: [
+        {
+          name: 'claude-3-opus-20240229',
+          label: 'Claude 3 Opus',
+          provider: 'Anthropic',
+          maxTokenAllowed: 200000,
+          maxCompletionTokens: 128000,
+        },
+        {
+          name: 'claude-3-sonnet-20240229',
+          label: 'Claude 3 Sonnet',
+          provider: 'Anthropic',
+          maxTokenAllowed: 200000,
+          maxCompletionTokens: 128000,
+        },
+        {
+          name: 'claude-3-haiku-20240307',
+          label: 'Claude 3 Haiku',
+          provider: 'Anthropic',
+          maxTokenAllowed: 200000,
+          maxCompletionTokens: 128000,
+        },
+      ],
+    }),
+    [],
+  );
+
   useEffect(() => {
-    const google = providerList.find((p) => p.name.toLowerCase().includes('google')) || providerList[0];
-    if (google && setProvider && provider?.name !== google.name) {
-      setProvider(google);
+    if (!provider && setProvider && providerList.length > 0) {
+      const google = providerList.find((p) => p.name === 'Google');
+      setProvider(google || providerList[0]);
     }
 
     if (!model && setModel) {
-      const providerName = google ? google.name : provider?.name;
-      const preferred = modelList.find(
-        (m) => m.name === DEFAULT_MODEL && (!providerName || m.provider === providerName),
-      );
-      const altPreferred = modelList.find(
-        (m) => m.name.toLowerCase().includes('gemini-2.5') && (!providerName || m.provider === providerName),
-      );
-      const geminiModel =
-        modelList.find(
-          (m) =>
-            (!providerName || m.provider === providerName) &&
-            (m.name.toLowerCase().includes('gemini') || m.label.toLowerCase().includes('gemini')),
-        ) || modelList.find((m) => (!providerName || m.provider === providerName)) || modelList[0];
-
-      const pick = preferred || altPreferred || geminiModel;
-      if (pick) {
-        setModel(pick.name);
-      }
+      const providerName = (provider && provider.name) || providerList.find((p) => p.name === 'Google')?.name || providerList[0]?.name;
+      const staticForProvider = providerList.find((p) => p.name === providerName)?.staticModels || [];
+      const fallbackForProvider = fallbackModelsByProvider[providerName || ''] || [];
+      const preferredDynamic = modelList.find((m) => m.name === DEFAULT_MODEL && (!providerName || m.provider === providerName));
+      const preferredStatic = staticForProvider.find((m) => m.name === DEFAULT_MODEL) || fallbackForProvider.find((m) => m.name === DEFAULT_MODEL);
+      const firstDynamic = modelList.find((m) => (!providerName || m.provider === providerName));
+      const firstStatic = staticForProvider[0] || fallbackForProvider[0];
+      const pick = preferredDynamic || preferredStatic || firstDynamic || firstStatic || modelList[0] || staticForProvider[0] || fallbackForProvider[0];
+      if (pick) setModel(pick.name);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [providerList, modelList]);
 
   // Debounce search queries
   useEffect(() => {
@@ -197,7 +263,9 @@ export const ModelSelector = ({
   }, []);
 
   const filteredModels = useMemo(() => {
-    const baseModels = [...modelList].filter((e) => e.provider === provider?.name && e.name);
+    const providerStatic = providerList.find((p) => p.name === provider?.name)?.staticModels || [];
+    const baseFromDynamic = [...modelList].filter((e) => e.provider === provider?.name && e.name);
+    const baseModels = baseFromDynamic.length > 0 ? baseFromDynamic : providerStatic;
 
     return baseModels
       .filter((model) => {
@@ -234,7 +302,7 @@ export const ModelSelector = ({
 
         return a.label.localeCompare(b.label);
       });
-  }, [modelList, provider?.name, showFreeModelsOnly, debouncedModelSearchQuery]);
+  }, [modelList, providerList, provider?.name, showFreeModelsOnly, debouncedModelSearchQuery]);
 
   const filteredProviders = useMemo(() => {
     if (!debouncedProviderSearchQuery) {
@@ -267,6 +335,16 @@ export const ModelSelector = ({
   useEffect(() => {
     setFocusedProviderIndex(-1);
   }, [debouncedProviderSearchQuery, isProviderDropdownOpen]);
+
+  const selectedModelLabel = useMemo(() => {
+    const dyn = modelList.find((m) => m.name === model)?.label;
+    if (dyn) return dyn;
+    const staticForProvider = providerList.find((p) => p.name === provider?.name)?.staticModels || [];
+    const stat = staticForProvider.find((m) => m.name === model)?.label;
+    if (stat) return stat;
+    const fb = (fallbackModelsByProvider[provider?.name || ''] || []).find((m) => m.name === model)?.label;
+    return fb;
+  }, [model, modelList, providerList, provider?.name, fallbackModelsByProvider]);
 
   // Clear search functions
   const clearModelSearch = useCallback(() => {
@@ -366,6 +444,9 @@ export const ModelSelector = ({
 
         if (focusedProviderIndex >= 0 && focusedProviderIndex < filteredProviders.length) {
           const selectedProvider = filteredProviders[focusedProviderIndex];
+          if (selectedProvider.name !== 'Google') {
+            return;
+          }
 
           if (setProvider) {
             setProvider(selectedProvider);
@@ -445,28 +526,119 @@ export const ModelSelector = ({
     );
   }
 
-  // Render: Provider locked pill + interactive model dropdown (Google-only)
-  const lockedProvider = provider?.name || 'Google';
+  // Render: Provider dropdown + model dropdown
 
   return (
     <div className="flex items-center gap-2 flex-row flex-wrap w-full">
-      {/* Provider (locked) */}
-      <div className="relative flex select-none shrink-0 w-auto">
+      {/* Provider Combobox */}
+      <div
+        className="relative flex select-none shrink-0 w-auto"
+        onKeyDown={handleProviderKeyDown}
+        ref={providerDropdownRef}
+      >
         <div
-          className="w-auto h-9 px-3 rounded-lg border border-cyan-400/40 transition-all cursor-default flex items-center whitespace-nowrap"
+          className={classNames(
+            'w-auto h-9 px-3 rounded-lg border transition-all cursor-pointer flex items-center whitespace-nowrap',
+            isProviderDropdownOpen ? 'border-cyan-400/50 ring-2 ring-cyan-400/20' : 'border-gray-700/50 hover:border-cyan-400/30',
+          )}
           style={{
             background: 'rgba(17, 24, 39, 0.85)',
             backdropFilter: 'blur(12px)',
             boxShadow: '0 0 20px rgba(6, 182, 212, 0.25)',
           }}
-          role="presentation"
-          aria-label="Provider"
+          role="combobox"
+          aria-expanded={isProviderDropdownOpen}
+          aria-controls="provider-listbox"
+          aria-haspopup="listbox"
+          tabIndex={0}
+          onClick={() => setIsProviderDropdownOpen(!isProviderDropdownOpen)}
         >
           <div className="flex items-center gap-2">
-            <div className="truncate text-white font-medium">{lockedProvider}</div>
-            <span className="text-xs text-cyan-400 bg-cyan-400/10 px-2 py-0.5 rounded">Locked</span>
+            <div className="truncate text-white font-medium">{provider?.name || providerList[0]?.name || 'Provider'}</div>
+            <div
+              className={classNames(
+                'i-ph:caret-down w-4 h-4 text-cyan-400 transition-transform',
+                isProviderDropdownOpen ? 'rotate-180' : undefined,
+              )}
+            />
           </div>
         </div>
+
+        {isProviderDropdownOpen && (
+          <div
+            className="absolute z-50 w-[260px] mt-1 py-2 rounded-xl shadow-2xl top-full"
+            style={{
+              background: 'rgba(17, 24, 39, 0.98)',
+              border: '1px solid rgba(6, 182, 212, 0.4)',
+              backdropFilter: 'blur(24px)',
+              boxShadow: '0 0 40px rgba(6, 182, 212, 0.3), 0 10px 50px rgba(0, 0, 0, 0.5)',
+            }}
+            role="listbox"
+            id="provider-listbox"
+          >
+
+            <div className="max-h-60 overflow-y-auto sm:scrollbar-none">
+              {filteredProviders.length === 0 ? (
+                <div className="px-3 py-3 text-sm">
+                  <div className="text-bolt-elements-textTertiary mb-1">No providers available</div>
+                </div>
+              ) : (
+                filteredProviders.map((p, index) => (
+                  <div
+                    ref={(el) => (providerOptionsRef.current[index] = el)}
+                    key={p.name}
+                    role="option"
+                    aria-selected={provider?.name === p.name}
+                    aria-disabled={p.name !== 'Google'}
+                    className={classNames(
+                      'px-4 py-2.5 text-sm text-white outline-none transition-all',
+                      p.name !== 'Google' ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
+                    )}
+                    onMouseEnter={(e) => {
+                      if (p.name !== 'Google') return;
+                      e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (p.name !== 'Google') return;
+                      e.currentTarget.style.background = 'transparent';
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (p.name !== 'Google') return;
+                      setProvider?.(p);
+                      const dynamicDefault = modelList.find((m) => m.provider === p.name && m.name === DEFAULT_MODEL);
+                      const staticDefault = providerList.find((pp) => pp.name === p.name)?.staticModels?.find((m) => m.name === DEFAULT_MODEL);
+                      const fallbackDefault = (fallbackModelsByProvider[p.name] || []).find((m) => m.name === DEFAULT_MODEL);
+                      const dynamicFirst = modelList.find((m) => m.provider === p.name);
+                      const staticFirst = providerList.find((pp) => pp.name === p.name)?.staticModels?.[0];
+                      const pick = dynamicDefault || staticDefault || fallbackDefault || dynamicFirst || staticFirst || (fallbackModelsByProvider[p.name] || [])[0];
+                      if (pick && setModel) setModel(pick.name);
+                      setIsProviderDropdownOpen(false);
+                      setProviderSearchQuery('');
+                      setDebouncedProviderSearchQuery('');
+                    }}
+                    tabIndex={focusedProviderIndex === index ? 0 : -1}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate" dangerouslySetInnerHTML={{ __html: (p as any).highlightedName || p.name }} />
+                      </div>
+                      {p.name !== 'Google' ? (
+                        <span className="ml-2 text-[10px] px-2 py-0.5 rounded-full border border-yellow-400/40 text-yellow-300 bg-yellow-400/10">
+                          Coming soon
+                        </span>
+                      ) : (
+                        provider?.name === p.name && (
+                          <span className="i-ph:check text-xs text-green-500 ml-2" title="Selected" />
+                        )
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Model Combobox (interactive) */}
@@ -496,7 +668,7 @@ export const ModelSelector = ({
           tabIndex={0}
         >
           <div className="flex items-center justify-between">
-            <div className="truncate text-white font-medium">{modelList.find((m) => m.name === model)?.label || 'Select model'}</div>
+            <div className="truncate text-white font-medium">{selectedModelLabel || 'Select model'}</div>
             <div
               className={classNames(
                 'i-ph:caret-down w-4 h-4 text-cyan-400 transition-transform',
@@ -518,47 +690,6 @@ export const ModelSelector = ({
             role="listbox"
             id="model-listbox"
           >
-            <div className="px-3 pb-2 pt-1 space-y-2">
-              {/* Search Input */}
-              <div className="relative">
-                <input
-                  ref={modelSearchInputRef}
-                  type="text"
-                  value={modelSearchQuery}
-                  onChange={(e) => setModelSearchQuery(e.target.value)}
-                  placeholder="Search models... (⌘K to clear)"
-                  className={classNames(
-                    'w-full pl-9 pr-9 py-2.5 rounded-lg text-sm',
-                    'text-white placeholder:text-gray-500',
-                    'focus:outline-none focus:ring-2 focus:ring-cyan-400/30 transition-all',
-                  )}
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.3)',
-                    border: '1px solid rgba(107, 114, 128, 0.3)',
-                    caretColor: '#06b6d4',
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                  role="searchbox"
-                  aria-label="Search models"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                  <span className="i-ph:magnifying-glass text-gray-400" />
-                </div>
-                {modelSearchQuery && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearModelSearch();
-                    }}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-bolt-elements-background-depth-3 transition-colors"
-                    aria-label="Clear search"
-                  >
-                    <span className="i-ph:x text-bolt-elements-textTertiary text-xs" />
-                  </button>
-                )}
-              </div>
-            </div>
 
             <div
               className={classNames(

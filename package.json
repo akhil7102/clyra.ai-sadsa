@@ -1,5 +1,5 @@
 {
-  "name": "bolt",
+  "name": "clyra.ai",
   "description": "An AI Agent",
   "private": true,
   "license": "MIT",
@@ -7,8 +7,8 @@
   "type": "module",
   "version": "1.0.0",
   "author": {
-    "name": "bolt.diy team",
-    "email": "maintainers@bolt.diy"
+    "name": "rudracore team",
+    "email": "rudracore2025@gmail.com"
   },
   "scripts": {
     "deploy": "npm run build && wrangler pages deploy",
@@ -55,6 +55,7 @@
     "@ai-sdk/openai": "1.1.2",
     "@ai-sdk/react": "^1.2.12",
     "@ai-sdk/ui-utils": "^1.2.11",
+    "@clerk/remix": "^4.0.0",
     "@codemirror/autocomplete": "^6.18.3",
     "@codemirror/commands": "^6.7.1",
     "@codemirror/lang-cpp": "^6.0.2",
@@ -100,8 +101,8 @@
     "@remix-run/cloudflare-pages": "^2.15.2",
     "@remix-run/node": "^2.15.2",
     "@remix-run/react": "^2.15.2",
-    "@supabase/supabase-js": "^2.45.4",
     "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.80.0",
     "@tanstack/react-virtual": "^3.13.0",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@uiw/codemirror-theme-vscode": "^4.23.6",
@@ -157,6 +158,7 @@
     "remix-utils": "^7.7.0",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "shiki": "^1.24.0",
+    "svix": "^1.81.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.181.0",

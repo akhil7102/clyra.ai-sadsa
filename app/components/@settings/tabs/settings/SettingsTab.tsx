@@ -69,7 +69,7 @@ export default function SettingsTab() {
         transition={{ delay: 0.1 }}
       >
         <div className="flex items-center gap-2 mb-4">
-          <div className="i-ph:palette-fill w-4 h-4 text-purple-500" />
+          <div className="i-ph:palette-fill w-4 h-4 text-cyan-400" />
           <span className="text-sm font-medium text-bolt-elements-textPrimary">Preferences</span>
         </div>
 
@@ -149,7 +149,7 @@ export default function SettingsTab() {
         transition={{ delay: 0.2 }}
       >
         <div className="flex items-center gap-2 mb-4">
-          <div className="i-ph:clock-fill w-4 h-4 text-purple-500" />
+          <div className="i-ph:clock-fill w-4 h-4 text-cyan-400" />
           <span className="text-sm font-medium text-bolt-elements-textPrimary">Time Settings</span>
         </div>
 
@@ -183,7 +183,7 @@ export default function SettingsTab() {
         transition={{ delay: 0.3 }}
       >
         <div className="flex items-center gap-2 mb-4">
-          <div className="i-ph:keyboard-fill w-4 h-4 text-purple-500" />
+          <div className="i-ph:keyboard-fill w-4 h-4 text-cyan-400" />
           <span className="text-sm font-medium text-bolt-elements-textPrimary">Keyboard Shortcuts</span>
         </div>
 

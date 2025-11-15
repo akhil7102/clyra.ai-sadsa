@@ -89,7 +89,7 @@ export default function ProfileTab() {
                   )}
                 />
               ) : (
-                <div className="i-ph:robot-fill w-16 h-16 text-gray-400 dark:text-gray-500 transition-colors group-hover:text-purple-500/70 transform -translate-y-1" />
+                <div className="i-ph:robot-fill w-16 h-16 text-gray-400 dark:text-gray-500 transition-colors group-hover:text-cyan-400/70 transform -translate-y-1" />
               )}
 
               <label
@@ -129,7 +129,7 @@ export default function ProfileTab() {
             <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Username</label>
             <div className="relative group">
               <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
-                <div className="i-ph:user-circle-fill w-5 h-5 text-gray-400 dark:text-gray-500 transition-colors group-focus-within:text-purple-500" />
+                <div className="i-ph:user-circle-fill w-5 h-5 text-gray-400 dark:text-gray-500 transition-colors group-focus-within:text-cyan-400" />
               </div>
               <input
                 type="text"
@@ -154,7 +154,7 @@ export default function ProfileTab() {
             <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Bio</label>
             <div className="relative group">
               <div className="absolute left-3.5 top-3">
-                <div className="i-ph:text-aa w-5 h-5 text-gray-400 dark:text-gray-500 transition-colors group-focus-within:text-purple-500" />
+                <div className="i-ph:text-aa w-5 h-5 text-gray-400 dark:text-gray-500 transition-colors group-focus-within:text-cyan-400" />
               </div>
               <textarea
                 value={profile.bio}

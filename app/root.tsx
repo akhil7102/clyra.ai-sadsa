@@ -1,10 +1,8 @@
 import { useStore } from '@nanostores/react';
 import type { LinksFunction, HeadersFunction } from '@remix-run/cloudflare';
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useNavigation, useLoaderData } from '@remix-run/react';
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useNavigation, useLoaderData, isRouteErrorResponse, useRouteError } from '@remix-run/react';
 import type { LoaderFunctionArgs } from '@remix-run/cloudflare';
 import { json } from '@remix-run/cloudflare';
-import { getAuthUser } from './lib/auth/supabase-auth.server';
-import { SupabaseProvider } from './lib/auth/supabase-client';
 import resetStyles from '@unocss/reset/eric-meyer.css?url';
 import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
@@ -14,6 +12,9 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ClientOnly } from 'remix-utils/client-only';
 import { cssTransition, ToastContainer } from 'react-toastify';
+
+// Import Clerk
+import { ClerkApp, rootAuthLoader } from '@clerk/remix';
 
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
@@ -82,20 +83,13 @@ export const Head = createHead(() => (
   </>
 ));
 
-export const loader = async (args: LoaderFunctionArgs) => {
-  const { user, headers } = await getAuthUser(args);
-  const env = (args as any)?.context?.cloudflare?.env;
-  
-  return json(
-    {
-      user,
-      env: {
-        VITE_SUPABASE_URL: env?.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL,
-        VITE_SUPABASE_ANON_KEY: env?.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY,
-      },
-    },
-    { headers }
-  );
+// Use Clerk's rootAuthLoader and merge our own data via callback
+export const loader = (args: LoaderFunctionArgs) => {
+  return rootAuthLoader(args, () => {
+    return {
+      env: {},
+    };
+  });
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -185,7 +179,7 @@ import { logStore } from './lib/stores/logs';
 
 function App() {
   const theme = useStore(themeStore);
-  const { user, env } = useLoaderData<typeof loader>();
+  const { env } = useLoaderData<typeof loader>();
 
   useEffect(() => {
     logStore.logSystem('Application initialized', {
@@ -221,13 +215,34 @@ function App() {
           __html: `window.ENV = ${JSON.stringify(env)}`,
         }}
       />
-      <SupabaseProvider serverSession={user}>
-        <Layout>
-          <Outlet />
-        </Layout>
-      </SupabaseProvider>
+      <Layout>
+        <Outlet />
+      </Layout>
     </>
   );
 }
 
-export default App;
+// Wrap the app with ClerkApp
+export default ClerkApp(App);
+
+// Standard error boundary
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div className="error-container">
+        <h1>Error: {error.status}</h1>
+        <p>{error.statusText}</p>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="error-container">
+      <h1>Something went wrong</h1>
+      <p>{error instanceof Error ? error.message : 'Unknown error'}</p>
+    </div>
+  );
+}

@@ -306,7 +306,7 @@ export default function LocalProvidersTab() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center ring-1 ring-purple-500/30">
-              <Cpu className="w-6 h-6 text-purple-500" />
+              <Cpu className="w-6 h-6 text-cyan-400" />
             </div>
             <div>
               <h2 className="text-2xl font-semibold text-bolt-elements-textPrimary">Local AI Providers</h2>
@@ -364,7 +364,7 @@ export default function LocalProvidersTab() {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <PackageOpen className="w-5 h-5 text-purple-500" />
+                        <PackageOpen className="w-5 h-5 text-cyan-400" />
                         <h3 className="text-lg font-semibold text-bolt-elements-textPrimary">Installed Models</h3>
                       </div>
                       <Button

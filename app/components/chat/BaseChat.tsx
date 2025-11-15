@@ -7,7 +7,7 @@ import React, { type RefCallback, useEffect, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Workbench } from '~/components/workbench/Workbench.client';
 import { classNames } from '~/utils/classNames';
-import { PROVIDER_LIST } from '~/utils/constants';
+import { PROVIDER_LIST, DEFAULT_MODEL, DEFAULT_PROVIDER } from '~/utils/constants';
 import { Messages } from './Messages.client';
 import { getApiKeysFromCookies } from './APIKeyManager';
 import Cookies from 'js-cookie';
@@ -28,10 +28,10 @@ import { ChatBox } from './ChatBox';
 import type { DesignScheme } from '~/types/design-scheme';
 import type { ElementInfo } from '~/components/workbench/Inspector';
 import LlmErrorAlert from './LLMApiAlert';
-import { Link, useLocation } from '@remix-run/react';
-import { useUser } from '~/lib/auth/supabase-client';
+import { useLocation } from '@remix-run/react';
 import { chatId as chatIdAtom } from '~/lib/persistence/useChatHistory';
 import { workbenchStore } from '~/lib/stores/workbench';
+import { useUser, SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/remix';
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -150,7 +150,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const location = typeof window === 'undefined' ? { pathname: '' } : useLocation();
     const isChatRoute = location.pathname.startsWith('/chat');
     const showWorkbench = useStore(workbenchStore.showWorkbench);
-    const user = useUser();
+    const { isSignedIn, user } = useUser();
+    useEffect(() => {
+      if (isSignedIn) {
+        setProvider?.(DEFAULT_PROVIDER as ProviderInfo);
+        setModel?.(DEFAULT_MODEL);
+      }
+    }, [isSignedIn]);
+    
 
     React.useEffect(() => {
       if (!(chatStarted || isChatRoute)) {
@@ -444,7 +451,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   </p>
                   {/* Intro composer under tagline */}
                   <div className="max-w-chat mx-auto z-prompt">
-                    {user ? (
+                    <SignedIn>
                       <ChatBox
                         isModelSettingsCollapsed={isModelSettingsCollapsed}
                         setIsModelSettingsCollapsed={setIsModelSettingsCollapsed}
@@ -490,14 +497,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         setSelectedElement={setSelectedElement}
                         alignLeft
                       />
-                    ) : (
+                    </SignedIn>
+                    <SignedOut>
                       <div className="mx-auto max-w-md rounded-xl border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 p-6 text-center">
                         <p className="text-bolt-elements-textPrimary mb-4">Please sign in to start chatting.</p>
-                        <Link className="inline-flex items-center gap-2 rounded-lg px-4 py-2 border border-accent-200/60 text-accent-600 hover:bg-white/10 transition-colors" to="/sign-in">
-                          <span className="i-ph:sign-in" /> Sign In
-                        </Link>
+                        <div className="flex justify-center gap-3">
+                          <SignInButton mode="modal">
+                            <button className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-gray-200 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-colors">
+                              <span className="i-ph:sign-in" /> Sign In
+                            </button>
+                          </SignInButton>
+                        </div>
                       </div>
-                    )}
+                    </SignedOut>
                   </div>
                 </div>
                 {/* Footer removed */}
@@ -613,7 +625,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     
                     {/* Chat input box */}
                     <div ref={promptWrapperRef}>
-                      {user ? (
+                      <SignedIn>
                         <ChatBox
                           isModelSettingsCollapsed={isModelSettingsCollapsed}
                           setIsModelSettingsCollapsed={setIsModelSettingsCollapsed}
@@ -659,14 +671,17 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           setSelectedElement={setSelectedElement}
                           alignLeft={showWorkbench}
                         />
-                      ) : (
+                      </SignedIn>
+                      <SignedOut>
                         <div className="rounded-xl border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 p-4 text-center">
                           <p className="text-bolt-elements-textPrimary mb-2">Sign in to send messages.</p>
-                          <Link className="inline-flex items-center gap-1 text-sm text-accent-600 hover:text-accent-500" to="/sign-in">
-                            <span className="i-ph:sign-in" /> Sign In
-                          </Link>
+                          <SignInButton mode="modal">
+                            <button className="inline-flex items-center gap-2 text-sm text-gray-200 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white px-4 py-2 rounded-lg transition-colors">
+                              <span className="i-ph:sign-in" /> Sign In
+                            </button>
+                          </SignInButton>
                         </div>
-                      )}
+                      </SignedOut>
                     </div>
                   </div>
                 </div>

@@ -64,6 +64,10 @@ interface ChatBoxProps {
 
 export const ChatBox: React.FC<ChatBoxProps> = (props) => {
   const { isConnected } = useSupabaseConnection();
+  const __allowedDefaultProviders = new Set(['Google', 'OpenAI', 'Anthropic']);
+  const __defaultFilteredProviders = (PROVIDER_LIST as ProviderInfo[]).filter((p) =>
+    __allowedDefaultProviders.has(p.name),
+  );
   return (
     <div
       className={classNames(
@@ -294,7 +298,7 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
                     modelList={props.modelList}
                     provider={props.provider}
                     setProvider={props.setProvider}
-                    providerList={props.providerList || (PROVIDER_LIST as ProviderInfo[])}
+                    providerList={props.providerList || __defaultFilteredProviders}
                     apiKeys={props.apiKeys}
                     modelLoading={props.isModelLoading}
                   />
@@ -304,11 +308,11 @@ export const ChatBox: React.FC<ChatBoxProps> = (props) => {
                   title={isConnected ? 'Supabase connected' : 'Supabase disconnected'}
                   onClick={() => document.dispatchEvent(new Event('open-supabase-connection'))}
                   className={classNames(
-                    'p-1.5 rounded-md transition-all',
-                    isConnected
-                      ? 'text-[#3b82f6]'
-                      : 'text-white/60 hover:text-[#3b82f6]'
+                    'p-1.5 rounded-lg transition-colors border',
+                    'bg-white/5 border-white/10 text-gray-200 hover:bg-white/10 hover:text-white',
+                    isConnected && 'text-emerald-400 bg-emerald-400/10 border-emerald-400/25 hover:bg-emerald-400/15'
                   )}
+                  aria-label="Supabase connection"
                 >
                   <div className="i-ph:lightning text-xl" />
                 </button>

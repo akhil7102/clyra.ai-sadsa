@@ -74,7 +74,7 @@ function SetupGuide({ onBack }: { onBack: () => void }) {
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Monitor className="w-4 h-4 text-purple-500" />
+                <Monitor className="w-4 h-4 text-cyan-400" />
                 <span className="font-medium text-bolt-elements-textPrimary">GPU</span>
               </div>
               <p className="text-bolt-elements-textSecondary">NVIDIA RTX 30xx+ or AMD RX 6000+</p>
@@ -88,7 +88,7 @@ function SetupGuide({ onBack }: { onBack: () => void }) {
         <CardHeader className="pb-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 flex items-center justify-center ring-1 ring-purple-500/30">
-              <Server className="w-6 h-6 text-purple-500" />
+              <Server className="w-6 h-6 text-cyan-400" />
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-semibold text-bolt-elements-textPrimary">Ollama Setup</h3>
@@ -253,7 +253,7 @@ function SetupGuide({ onBack }: { onBack: () => void }) {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20">
                 <div className="flex items-center gap-2 mb-2">
-                  <Activity className="w-4 h-4 text-purple-500" />
+                  <Activity className="w-4 h-4 text-cyan-400" />
                   <span className="font-medium text-purple-500">Performance Optimized</span>
                 </div>
                 <ul className="text-xs text-bolt-elements-textSecondary space-y-1">
@@ -532,7 +532,7 @@ function SetupGuide({ onBack }: { onBack: () => void }) {
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <Activity className="w-5 h-5 text-purple-500" />
+              <Activity className="w-5 h-5 text-cyan-400" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-bolt-elements-textPrimary">Performance Optimization</h3>
@@ -628,7 +628,7 @@ function SetupGuide({ onBack }: { onBack: () => void }) {
                 </div>
                 <div className="p-3 rounded-lg bg-bolt-elements-background-depth-3">
                   <div className="flex items-center gap-2 mb-1">
-                    <Cable className="w-4 h-4 text-purple-500" />
+                    <Cable className="w-4 h-4 text-cyan-400" />
                     <span className="font-medium text-bolt-elements-textPrimary">KoboldAI</span>
                   </div>
                   <p className="text-xs text-bolt-elements-textSecondary">Focus on creative writing and storytelling</p>

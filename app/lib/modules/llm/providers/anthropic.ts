@@ -13,34 +13,27 @@ export default class AnthropicProvider extends BaseProvider {
   };
 
   staticModels: ModelInfo[] = [
-    /*
-     * Essential fallback models - only the most stable/reliable ones
-     * Claude 3.5 Sonnet: 200k context, excellent for complex reasoning and coding
-     */
+    // Classic Bolt DIY defaults (Claude 3 series)
     {
-      name: 'claude-3-5-sonnet-20241022',
-      label: 'Claude 3.5 Sonnet',
+      name: 'claude-3-opus-20240229',
+      label: 'Claude 3 Opus',
+      provider: 'Anthropic',
+      maxTokenAllowed: 200000,
+      maxCompletionTokens: 32000,
+    },
+    {
+      name: 'claude-3-sonnet-20240229',
+      label: 'Claude 3 Sonnet',
       provider: 'Anthropic',
       maxTokenAllowed: 200000,
       maxCompletionTokens: 128000,
     },
-
-    // Claude 3 Haiku: 200k context, fastest and most cost-effective
     {
       name: 'claude-3-haiku-20240307',
       label: 'Claude 3 Haiku',
       provider: 'Anthropic',
       maxTokenAllowed: 200000,
       maxCompletionTokens: 128000,
-    },
-
-    // Claude Opus 4: 200k context, 32k output limit (latest flagship model)
-    {
-      name: 'claude-opus-4-20250514',
-      label: 'Claude 4 Opus',
-      provider: 'Anthropic',
-      maxTokenAllowed: 200000,
-      maxCompletionTokens: 32000,
     },
   ];
 
