@@ -125,10 +125,10 @@ export default function SignUp() {
               </div>
             )}
 
-            <Form method="post" className="space-y-4" noValidate>
+            <Form method="post" className="space-y-4 flex flex-col items-center" noValidate>
               {/* Email Field */}
-              <div className="space-y-2">
-                <label htmlFor="email" className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
+              <div className="space-y-2 w-full">
+                <label htmlFor="email" className="block text-xs font-semibold text-gray-300 uppercase tracking-wider text-center">
                   Email Address
                 </label>
                 <div className="relative">
@@ -153,8 +153,8 @@ export default function SignUp() {
               </div>
 
               {/* Password Field */}
-              <div className="space-y-2">
-                <label htmlFor="password" className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
+              <div className="space-y-2 w-full">
+                <label htmlFor="password" className="block text-xs font-semibold text-gray-300 uppercase tracking-wider text-center">
                   Password
                 </label>
                 <div className="relative">
@@ -193,8 +193,8 @@ export default function SignUp() {
               </div>
 
               {/* Confirm Password Field */}
-              <div className="space-y-2">
-                <label htmlFor="confirmPassword" className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
+              <div className="space-y-2 w-full">
+                <label htmlFor="confirmPassword" className="block text-xs font-semibold text-gray-300 uppercase tracking-wider text-center">
                   Confirm Password
                 </label>
                 <div className="relative">
