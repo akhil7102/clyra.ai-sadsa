@@ -22,12 +22,10 @@ import xtermStyles from '@xterm/xterm/css/xterm.css?url';
 
 import 'virtual:uno.css';
 
-
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
   exit: 'animated fadeOutRight',
 });
-
 
 export const links: LinksFunction = () => [
   { rel: 'icon', href: '/favicon.ico' },
@@ -86,7 +84,7 @@ export const Head = createHead(() => (
 export const loader = async (args: LoaderFunctionArgs) => {
   const { user, headers } = await getAuthUser(args);
   const env = (args as any)?.context?.cloudflare?.env;
-  
+
   return json(
     {
       user,
@@ -95,7 +93,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
         VITE_SUPABASE_ANON_KEY: env?.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY,
       },
     },
-    { headers }
+    { headers },
   );
 };
 
