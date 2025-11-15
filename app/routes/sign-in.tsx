@@ -140,10 +140,10 @@ export default function SignIn() {
                     name="email"
                     required
                     disabled={isSubmitting}
-                    className="w-full px-4 py-3 rounded-lg text-white placeholder-gray-500 transition-all duration-300 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 transition-all duration-300 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                       background: emailFocused ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.05)',
-                      border: emailFocused ? '1px solid rgba(102, 255, 178, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
+                      border: emailFocused ? '1.5px solid rgba(102, 255, 178, 0.6)' : '1.5px solid rgba(255, 255, 255, 0.1)',
                       boxShadow: emailFocused ? '0 0 20px rgba(102, 255, 178, 0.25)' : 'none',
                     }}
                     placeholder="you@example.com"
@@ -167,10 +167,10 @@ export default function SignIn() {
                     required
                     minLength={6}
                     disabled={isSubmitting}
-                    className="w-full px-4 py-3 rounded-lg text-white placeholder-gray-500 transition-all duration-300 outline-none pr-12 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 transition-all duration-300 outline-none pr-12 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                       background: passwordFocused ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.05)',
-                      border: passwordFocused ? '1px solid rgba(102, 255, 178, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
+                      border: passwordFocused ? '1.5px solid rgba(102, 255, 178, 0.6)' : '1.5px solid rgba(255, 255, 255, 0.1)',
                       boxShadow: passwordFocused ? '0 0 20px rgba(102, 255, 178, 0.25)' : 'none',
                     }}
                     placeholder="••••••••"
@@ -183,7 +183,7 @@ export default function SignIn() {
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isSubmitting}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                   >
                     {showPassword ? (
                       <span className="i-ph:eye-slash text-lg" />
