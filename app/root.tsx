@@ -1,5 +1,3 @@
-'use client';
-
 import { useStore } from '@nanostores/react';
 import type { LinksFunction, HeadersFunction } from '@remix-run/cloudflare';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useNavigation, useLoaderData } from '@remix-run/react';
