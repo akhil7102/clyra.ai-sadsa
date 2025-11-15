@@ -14,6 +14,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ClientOnly } from 'remix-utils/client-only';
 import { cssTransition, ToastContainer } from 'react-toastify';
+import { logStore } from './lib/stores/logs';
 
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
@@ -21,12 +22,10 @@ import xtermStyles from '@xterm/xterm/css/xterm.css?url';
 
 import 'virtual:uno.css';
 
-
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
   exit: 'animated fadeOutRight',
 });
-
 
 export const links: LinksFunction = () => [
   { rel: 'icon', href: '/favicon.ico' },
@@ -85,7 +84,7 @@ export const Head = createHead(() => (
 export const loader = async (args: LoaderFunctionArgs) => {
   const { user, headers } = await getAuthUser(args);
   const env = (args as any)?.context?.cloudflare?.env;
-  
+
   return json(
     {
       user,
@@ -94,46 +93,13 @@ export const loader = async (args: LoaderFunctionArgs) => {
         VITE_SUPABASE_ANON_KEY: env?.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY,
       },
     },
-    { headers }
+    { headers },
   );
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const theme = useStore(themeStore);
-  const navigation = useNavigation();
-  const isNavigating = navigation.state !== 'idle';
-
-  useEffect(() => {
-    document.querySelector('html')?.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // Register service worker for PWA
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
-      });
-    }
-  }, []);
-
   return (
     <div className="relative min-h-screen text-gray-200 overflow-hidden">
-      {/* Top route progress bar */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: isNavigating ? 2 : 0,
-          backgroundColor: '#66ffb2',
-          boxShadow: isNavigating ? '0 0 12px rgba(102,255,178,0.5)' : 'none',
-          transition: 'height 180ms ease, opacity 180ms ease',
-          opacity: isNavigating ? 1 : 0,
-          zIndex: 1000,
-        }}
-      />
-
       {/* Global background layers */}
       <div className="app-bg-layers">
         <div className="gradient-background" />
@@ -181,11 +147,69 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-import { logStore } from './lib/stores/logs';
+function LayoutClient({ children }: { children: React.ReactNode }) {
+  const theme = useStore(themeStore);
+  const navigation = useNavigation();
+  const isNavigating = navigation.state !== 'idle';
+
+  useEffect(() => {
+    document.querySelector('html')?.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  // Register service worker for PWA
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  }, []);
+
+  return (
+    <div>
+      {/* Top route progress bar */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: isNavigating ? 2 : 0,
+          backgroundColor: '#66ffb2',
+          boxShadow: isNavigating ? '0 0 12px rgba(102,255,178,0.5)' : 'none',
+          transition: 'height 180ms ease, opacity 180ms ease',
+          opacity: isNavigating ? 1 : 0,
+          zIndex: 1000,
+        }}
+      />
+      {children}
+    </div>
+  );
+}
 
 function App() {
-  const theme = useStore(themeStore);
   const { user, env } = useLoaderData<typeof loader>();
+
+  return (
+    <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.ENV = ${JSON.stringify(env)}`,
+        }}
+      />
+      <ClientOnly>
+        {() => (
+          <SupabaseProvider serverSession={user}>
+            <AppContent />
+          </SupabaseProvider>
+        )}
+      </ClientOnly>
+    </>
+  );
+}
+
+function AppContent() {
+  const theme = useStore(themeStore);
 
   useEffect(() => {
     logStore.logSystem('Application initialized', {
@@ -212,21 +236,14 @@ function App() {
       .catch((error) => {
         logStore.logError('Failed to initialize debug logging', error);
       });
-  }, []);
+  }, [theme]);
 
   return (
-    <>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `window.ENV = ${JSON.stringify(env)}`,
-        }}
-      />
-      <SupabaseProvider serverSession={user}>
-        <Layout>
-          <Outlet />
-        </Layout>
-      </SupabaseProvider>
-    </>
+    <LayoutClient>
+      <Layout>
+        <Outlet />
+      </Layout>
+    </LayoutClient>
   );
 }
 
