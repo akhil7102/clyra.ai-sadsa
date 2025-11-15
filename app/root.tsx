@@ -240,9 +240,11 @@ function AppContent() {
   }, [theme]);
 
   return (
-    <Layout>
-      <Outlet />
-    </Layout>
+    <LayoutClient>
+      <Layout>
+        <Outlet />
+      </Layout>
+    </LayoutClient>
   );
 }
 
