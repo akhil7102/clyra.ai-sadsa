@@ -99,41 +99,8 @@ export const loader = async (args: LoaderFunctionArgs) => {
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const theme = useStore(themeStore);
-  const navigation = useNavigation();
-  const isNavigating = navigation.state !== 'idle';
-
-  useEffect(() => {
-    document.querySelector('html')?.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // Register service worker for PWA
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
-      });
-    }
-  }, []);
-
   return (
     <div className="relative min-h-screen text-gray-200 overflow-hidden">
-      {/* Top route progress bar */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: isNavigating ? 2 : 0,
-          backgroundColor: '#66ffb2',
-          boxShadow: isNavigating ? '0 0 12px rgba(102,255,178,0.5)' : 'none',
-          transition: 'height 180ms ease, opacity 180ms ease',
-          opacity: isNavigating ? 1 : 0,
-          zIndex: 1000,
-        }}
-      />
-
       {/* Global background layers */}
       <div className="app-bg-layers">
         <div className="gradient-background" />
@@ -177,6 +144,46 @@ export function Layout({ children }: { children: React.ReactNode }) {
       />
       <ScrollRestoration />
       <Scripts />
+    </div>
+  );
+}
+
+function LayoutClient({ children }: { children: React.ReactNode }) {
+  const theme = useStore(themeStore);
+  const navigation = useNavigation();
+  const isNavigating = navigation.state !== 'idle';
+
+  useEffect(() => {
+    document.querySelector('html')?.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  // Register service worker for PWA
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  }, []);
+
+  return (
+    <div>
+      {/* Top route progress bar */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: isNavigating ? 2 : 0,
+          backgroundColor: '#66ffb2',
+          boxShadow: isNavigating ? '0 0 12px rgba(102,255,178,0.5)' : 'none',
+          transition: 'height 180ms ease, opacity 180ms ease',
+          opacity: isNavigating ? 1 : 0,
+          zIndex: 1000,
+        }}
+      />
+      {children}
     </div>
   );
 }
