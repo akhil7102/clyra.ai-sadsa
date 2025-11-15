@@ -58,6 +58,8 @@ export default function SignIn() {
   const [searchParams] = useSearchParams();
   const isSubmitting = navigation.state === 'submitting';
   const [showPassword, setShowPassword] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const successMessage = searchParams.get('success');
 
   return (
@@ -79,83 +81,82 @@ export default function SignIn() {
       {/* Content */}
       <div className="relative z-10 flex-1 flex items-center justify-center w-full px-4 py-8">
         <div
-          className="backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden w-full max-w-md"
+          className="backdrop-blur-xl rounded-2xl overflow-hidden w-full max-w-md transition-all duration-300"
           style={{
-            background: 'rgba(10, 10, 10, 0.7)',
-            border: '1px solid rgba(102, 255, 178, 0.2)',
-            boxShadow: '0 0 60px rgba(102, 255, 178, 0.15)',
+            background: 'rgba(10, 10, 10, 0.8)',
+            border: '1px solid rgba(102, 255, 178, 0.3)',
+            boxShadow: '0 0 60px rgba(102, 255, 178, 0.15), inset 0 0 30px rgba(102, 255, 178, 0.05)',
           }}
         >
           {/* Header */}
           <div className="p-8 pb-6">
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-extrabold mb-2">
+              <h1 className="text-4xl font-bold mb-3">
                 <span className="bg-gradient-to-r from-[#a8c0ff] via-[#66ffb2] to-[#c2e9fb] bg-clip-text text-transparent">
                   Welcome Back
                 </span>
               </h1>
-              <p className="text-gray-400">Sign in to continue to Clyra.ai</p>
+              <p className="text-gray-400 text-sm">Sign in to continue to Clyra.ai</p>
             </div>
 
             {successMessage === 'account-created' && (
               <div
-                className="mb-6 p-4 rounded-lg"
+                className="mb-6 p-4 rounded-lg flex gap-3 items-start animate-in fade-in slide-in-from-top-2 duration-300"
                 style={{
-                  background: 'rgba(34, 197, 94, 0.1)',
-                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  background: 'rgba(34, 197, 94, 0.12)',
+                  border: '1px solid rgba(34, 197, 94, 0.4)',
                 }}
               >
-                <p className="text-green-400 text-sm">
-                  Account created successfully! Please sign in.
+                <span className="i-ph:check-circle text-green-400 text-lg flex-shrink-0 mt-0.5" />
+                <p className="text-green-300 text-sm">
+                  Account created! Sign in to continue.
                 </p>
               </div>
             )}
 
             {actionData?.error && (
               <div
-                className="mb-6 p-4 rounded-lg"
+                className="mb-6 p-4 rounded-lg flex gap-3 items-start animate-in fade-in slide-in-from-top-2 duration-300"
                 style={{
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
                 }}
               >
-                <p className="text-red-400 text-sm">{actionData.error}</p>
+                <span className="i-ph:warning-circle text-red-400 text-lg flex-shrink-0 mt-0.5" />
+                <p className="text-red-300 text-sm">{actionData.error}</p>
               </div>
             )}
 
-            <Form method="post" className="space-y-6" noValidate>
+            <Form method="post" className="space-y-5" noValidate>
               {/* Email Field */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
                   Email Address
                 </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  disabled={isSubmitting}
-                  className="w-full px-4 py-3 rounded-lg text-white placeholder-gray-500 transition-all duration-200 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                  }}
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  onFocus={(e) => {
-                    e.target.style.borderColor = 'rgba(102, 255, 178, 0.5)';
-                    e.target.style.boxShadow = '0 0 20px rgba(102, 255, 178, 0.2)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
+                <div className="relative">
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-3 rounded-lg text-white placeholder-gray-500 transition-all duration-300 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{
+                      background: emailFocused ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.05)',
+                      border: emailFocused ? '1px solid rgba(102, 255, 178, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
+                      boxShadow: emailFocused ? '0 0 20px rgba(102, 255, 178, 0.25)' : 'none',
+                    }}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    onFocus={() => setEmailFocused(true)}
+                    onBlur={() => setEmailFocused(false)}
+                  />
+                </div>
               </div>
 
               {/* Password Field */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <div className="space-y-2">
+                <label htmlFor="password" className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
                   Password
                 </label>
                 <div className="relative">
@@ -166,33 +167,28 @@ export default function SignIn() {
                     required
                     minLength={6}
                     disabled={isSubmitting}
-                    className="w-full px-4 py-3 rounded-lg text-white placeholder-gray-500 transition-all duration-200 outline-none pr-12 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 rounded-lg text-white placeholder-gray-500 transition-all duration-300 outline-none pr-12 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      background: passwordFocused ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.05)',
+                      border: passwordFocused ? '1px solid rgba(102, 255, 178, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
+                      boxShadow: passwordFocused ? '0 0 20px rgba(102, 255, 178, 0.25)' : 'none',
                     }}
                     placeholder="••••••••"
                     autoComplete="current-password"
-                    onFocus={(e) => {
-                      e.target.style.borderColor = 'rgba(102, 255, 178, 0.5)';
-                      e.target.style.boxShadow = '0 0 20px rgba(102, 255, 178, 0.2)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                      e.target.style.boxShadow = 'none';
-                    }}
+                    onFocus={() => setPasswordFocused(true)}
+                    onBlur={() => setPasswordFocused(false)}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isSubmitting}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                   >
                     {showPassword ? (
-                      <span className="i-ph:eye-slash text-xl" />
+                      <span className="i-ph:eye-slash text-lg" />
                     ) : (
-                      <span className="i-ph:eye text-xl" />
+                      <span className="i-ph:eye text-lg" />
                     )}
                   </button>
                 </div>
@@ -202,29 +198,36 @@ export default function SignIn() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-200 relative overflow-hidden group"
+                className="w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300 relative overflow-hidden group disabled:opacity-60 disabled:cursor-not-allowed mt-6"
                 style={{
-                  background: 'linear-gradient(135deg, #06b6d4, #3b82f6, #66ffb2)',
+                  background: isSubmitting
+                    ? 'rgba(102, 255, 178, 0.3)'
+                    : 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #66ffb2 100%)',
                   backgroundSize: '200% 200%',
+                  boxShadow: isSubmitting ? 'none' : '0 0 20px rgba(102, 255, 178, 0.2)',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundPosition = '100% 0';
-                  e.currentTarget.style.boxShadow = '0 0 30px rgba(102, 255, 178, 0.4)';
+                  if (!isSubmitting) {
+                    e.currentTarget.style.backgroundPosition = '100% 0';
+                    e.currentTarget.style.boxShadow = '0 0 30px rgba(102, 255, 178, 0.4)';
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundPosition = '0% 0';
-                  e.currentTarget.style.boxShadow = 'none';
+                  if (!isSubmitting) {
+                    e.currentTarget.style.backgroundPosition = '0% 0';
+                    e.currentTarget.style.boxShadow = '0 0 20px rgba(102, 255, 178, 0.2)';
+                  }
                 }}
               >
-                <span className="relative z-10 flex items-center justify-center gap-2">
+                <span className="relative z-10 flex items-center justify-center gap-2 font-medium">
                   {isSubmitting ? (
                     <>
-                      <span className="i-ph:spinner-gap animate-spin text-xl" />
+                      <span className="i-ph:spinner-gap animate-spin text-lg" />
                       Signing in...
                     </>
                   ) : (
                     <>
-                      <span className="i-ph:sign-in text-xl" />
+                      <span className="i-ph:sign-in text-lg" />
                       Sign In
                     </>
                   )}
@@ -235,19 +238,19 @@ export default function SignIn() {
 
           {/* Footer */}
           <div
-            className="px-8 py-6"
+            className="px-8 py-6 transition-colors duration-300"
             style={{
               borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-              background: 'rgba(0, 0, 0, 0.3)',
+              background: 'rgba(0, 0, 0, 0.4)',
             }}
           >
             <p className="text-center text-gray-400 text-sm">
               Don't have an account?{' '}
               <Link
                 to="/sign-up"
-                className="font-medium bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent hover:from-cyan-300 hover:to-blue-400 transition-all"
+                className="font-medium bg-gradient-to-r from-cyan-400 via-green-400 to-blue-500 bg-clip-text text-transparent hover:from-cyan-300 hover:via-green-300 hover:to-blue-400 transition-all duration-300"
               >
-                Sign Up
+                Create one
               </Link>
             </p>
           </div>
