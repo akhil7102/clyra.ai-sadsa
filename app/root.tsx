@@ -200,11 +200,13 @@ function App() {
           __html: `window.ENV = ${JSON.stringify(env)}`,
         }}
       />
-      <SupabaseProvider serverSession={user}>
-        <ClientOnly>
-          {() => <AppContent />}
-        </ClientOnly>
-      </SupabaseProvider>
+      <ClientOnly>
+        {() => (
+          <SupabaseProvider serverSession={user}>
+            <AppContent />
+          </SupabaseProvider>
+        )}
+      </ClientOnly>
     </>
   );
 }
